@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El Tren de las Religiones · Juego de repaso</title>
+<style>
+  :root{--sky:#dff1ff;--ink:#1f2a44;--rail:#6b4f3a;--ok:#2e9d5b;--bad:#d9534f;--card:#fff;--accent:#ff8a3d}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Trebuchet MS",system-ui,sans-serif;background:linear-gradient(#bfe4ff,var(--sky) 60%,#c9ecb5 60%);min-height:100vh;color:var(--ink)}
+  header{text-align:center;padding:18px 12px 4px}
+  h1{margin:0;font-size:clamp(1.5rem,5vw,2.4rem)}
+  .sub{margin:4px 0 0;opacity:.75}
+  .track{position:relative;height:120px;margin:16px auto 0;max-width:900px;padding:0 20px}
+  .rail{position:absolute;left:20px;right:20px;bottom:28px;height:8px;background:repeating-linear-gradient(90deg,var(--rail) 0 14px,transparent 14px 22px);border-top:3px solid #555;border-bottom:3px solid #555}
+  .station{position:absolute;bottom:42px;transform:translateX(-50%);text-align:center;font-size:.72rem;font-weight:bold;width:80px;transition:.3s}
+  .station .ico{font-size:1.8rem;display:block;filter:grayscale(1);opacity:.5;transition:.4s}
+  .station.done .ico{filter:none;opacity:1}
+  .train{position:absolute;bottom:30px;font-size:2.8rem;transform:translateX(-50%) scaleX(-1);transition:left 1.6s cubic-bezier(.5,0,.3,1)}
+  .smoke{position:absolute;bottom:80px;font-size:1.2rem;opacity:0;transform:translateX(-50%)}
+  .moving .smoke{animation:puff 1.6s}
+  @keyframes puff{0%{opacity:.8;bottom:75px}100%{opacity:0;bottom:115px}}
+  main{max-width:640px;margin:10px auto 30px;padding:0 14px}
+  .card{background:var(--card);border-radius:22px;padding:22px;box-shadow:0 8px 24px rgba(0,0,0,.12);text-align:center}
+  .tag{display:inline-block;background:#fff1e6;color:#b8571a;padding:4px 12px;border-radius:99px;font-size:.85rem;font-weight:bold}
+  .q{font-size:clamp(1.2rem,4vw,1.6rem);margin:14px 0 18px}
+  .opts{display:grid;gap:10px}
+  button.opt{font:inherit;font-size:1.15rem;padding:14px;border-radius:14px;border:3px solid #cfd8e6;background:#f7faff;cursor:pointer;transition:.15s}
+  button.opt:hover{border-color:var(--accent);transform:translateY(-2px)}
+  button.opt.ok{background:#e3f7ea;border-color:var(--ok)}
+  button.opt.bad{background:#fdecea;border-color:var(--bad);animation:shake .3s}
+  @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .msg{min-height:1.6em;margin-top:12px;font-weight:bold}
+  .big{font-size:3.5rem;margin:6px 0}
+  .go{font:inherit;font-size:1.2rem;background:var(--accent);color:#fff;border:0;border-radius:14px;padding:14px 26px;cursor:pointer;margin-top:12px}
+  .ticket{border:3px dashed var(--accent);border-radius:18px;padding:18px;margin-top:10px}
+  .stars{font-size:2rem;letter-spacing:4px}
+  footer{text-align:center;font-size:.8rem;opacity:.6;padding-bottom:20px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🚂 El Tren de las Religiones</h1>
+  <p class="sub">Responde bien para que el tren llegue a la siguiente estación</p>
+</header>
+
+<div class="track" id="track">
+  <div class="rail"></div>
+  <div class="smoke">💨</div>
+  <div class="train" id="train">🚂</div>
+</div>
+
+<main><div class="card" id="card"></div></main>
+<footer>Demo de juego de repaso · Hecho en casa con mucho cariño</footer>
+
+<script>
+const STATIONS = [
+  {name:"Cristianismo", ico:"✝️", fact:"Los cristianos siguen las enseñanzas de Jesús y rezan en iglesias.",
+   qs:[["¿Cómo se llama el libro sagrado de los cristianos?","La Biblia",["El Corán","La Torá"]],
+       ["¿Qué fiesta celebra el nacimiento de Jesús?","La Navidad",["El Diwali","El Ramadán"]]]},
+  {name:"Judaísmo", ico:"✡️", fact:"En Janucá, la fiesta de las luces, los judíos encienden las velas de un candelabro.",
+   qs:[["¿Dónde rezan los judíos?","En la sinagoga",["En la mezquita","En la pagoda"]],
+       ["¿Cuál es el símbolo del judaísmo?","La estrella de David",["La media luna","La rueda"]]]},
+  {name:"Islam", ico:"☪️", fact:"Los musulmanes rezan en la mezquita y su profeta es Mahoma.",
+   qs:[["¿Cómo se llama el libro sagrado del islam?","El Corán",["La Biblia","Los Vedas"]],
+       ["¿En qué mes ayunan los musulmanes?","En el Ramadán",["En Navidad","En Janucá"]]]},
+  {name:"Hinduismo", ico:"🕉️", fact:"El hinduismo es una de las religiones más antiguas del mundo.",
+   qs:[["¿En qué país nació el hinduismo?","En la India",["En Japón","En Egipto"]],
+       ["¿Cómo se llama la fiesta de las luces hindú?","El Diwali",["La Pascua","El Ramadán"]]]},
+  {name:"Budismo", ico:"☸️", fact:"Buda significa «el que ha despertado».",
+   qs:[["¿Quién fundó el budismo?","Buda",["Moisés","Mahoma"]],
+       ["¿Qué hacen los budistas para calmar la mente?","Meditar",["Correr","Cantar villancicos"]]]}
+];
+
+const track = document.getElementById("track"), train = document.getElementById("train"), card = document.getElementById("card");
+let st = 0, qi = 0, mistakes = 0;
+const pos = i => 8 + i * (84 / (STATIONS.length - 1)); // %
+
+STATIONS.forEach((s,i)=>{
+  const d=document.createElement("div"); d.className="station"; d.id="st"+i;
+  d.style.left=pos(i)+"%"; d.innerHTML=`<span class="ico">${s.ico}</span>${s.name}`;
+  track.appendChild(d);
+});
+const shuffle = a => a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
+function placeTrain(i){ train.style.left = (i<0? 2 : pos(i)) + "%"; }
+
+function start(){
+  st=0; qi=0; mistakes=0; placeTrain(-1);
+  document.querySelectorAll(".station").forEach(e=>e.classList.remove("done"));
+  card.innerHTML=`<div class="big">🎫</div><p class="q">¡Pasajeros al tren!<br>Vamos a visitar 5 estaciones.</p>
+  <button class="go" onclick="ask()">¡Arrancar! 🚂</button>`;
+}
+
+function ask(){
+  const s=STATIONS[st], [q,right,wrong]=s.qs[qi];
+  card.innerHTML=`<span class="tag">Próxima estación: ${s.ico} ${s.name} · pregunta ${qi+1}/2</span>
+  <p class="q">${q}</p><div class="opts"></div><div class="msg" id="msg"></div>`;
+  const box=card.querySelector(".opts");
+  shuffle([right,...wrong]).forEach(o=>{
+    const b=document.createElement("button"); b.className="opt"; b.textContent=o;
+    b.onclick=()=>answer(b,o===right); box.appendChild(b);
+  });
+}
+
+function answer(b,ok){
+  const msg=document.getElementById("msg");
+  if(!ok){ mistakes++; b.classList.add("bad"); b.disabled=true; msg.style.color="var(--bad)"; msg.textContent="¡Uy! Casi. Prueba otra vez 💪"; return; }
+  b.classList.add("ok"); card.querySelectorAll(".opt").forEach(x=>x.disabled=true);
+  msg.style.color="var(--ok)"; msg.textContent="¡Correcto! ⭐";
+  setTimeout(()=>{ qi++; if(qi<2) ask(); else arrive(); },800);
+}
+
+function arrive(){
+  const s=STATIONS[st];
+  track.classList.add("moving"); placeTrain(st);
+  setTimeout(()=>{
+    track.classList.remove("moving");
+    document.getElementById("st"+st).classList.add("done");
+    const last = st===STATIONS.length-1;
+    card.innerHTML=`<div class="big">${s.ico}</div><p class="q">¡Has llegado a la estación<br><b>${s.name}</b>!</p>
+    <p>💡 ${s.fact}</p>
+    <button class="go" onclick="${last?'finish()':'next()'}">${last?'Ver mi billete 🎫':'Siguiente estación ➡️'}</button>`;
+  },1600);
+}
+function next(){ st++; qi=0; ask(); }
+
+function finish(){
+  const stars = mistakes===0?3:mistakes<=3?2:1;
+  card.innerHTML=`<div class="ticket"><div class="big">🏆</div>
+  <p class="q">¡Viaje completado!</p>
+  <div class="stars">${"⭐".repeat(stars)}${"☆".repeat(3-stars)}</div>
+  <p>Has visitado las 5 estaciones: ${STATIONS.map(s=>s.ico).join(" ")}</p>
+  <p>Fallos: ${mistakes}</p></div>
+  <button class="go" onclick="start()">Volver a jugar 🔁</button>`;
+}
+start();
+</script>
+</body>
+</html>
