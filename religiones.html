@@ -1,139 +1,202 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>El Tren de las Religiones · Juego de repaso</title>
+<!doctype html><html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>El Tren de les Religions</title>
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap">
 <style>
-  :root{--sky:#dff1ff;--ink:#1f2a44;--rail:#6b4f3a;--ok:#2e9d5b;--bad:#d9534f;--card:#fff;--accent:#ff8a3d}
-  *{box-sizing:border-box}
-  body{margin:0;font-family:"Trebuchet MS",system-ui,sans-serif;background:linear-gradient(#bfe4ff,var(--sky) 60%,#c9ecb5 60%);min-height:100vh;color:var(--ink)}
-  header{text-align:center;padding:18px 12px 4px}
-  h1{margin:0;font-size:clamp(1.5rem,5vw,2.4rem)}
-  .sub{margin:4px 0 0;opacity:.75}
-  .track{position:relative;height:120px;margin:16px auto 0;max-width:900px;padding:0 20px}
-  .rail{position:absolute;left:20px;right:20px;bottom:28px;height:8px;background:repeating-linear-gradient(90deg,var(--rail) 0 14px,transparent 14px 22px);border-top:3px solid #555;border-bottom:3px solid #555}
-  .station{position:absolute;bottom:42px;transform:translateX(-50%);text-align:center;font-size:.72rem;font-weight:bold;width:80px;transition:.3s}
-  .station .ico{font-size:1.8rem;display:block;filter:grayscale(1);opacity:.5;transition:.4s}
-  .station.done .ico{filter:none;opacity:1}
-  .train{position:absolute;bottom:30px;font-size:2.8rem;transform:translateX(-50%) scaleX(-1);transition:left 1.6s cubic-bezier(.5,0,.3,1)}
-  .smoke{position:absolute;bottom:80px;font-size:1.2rem;opacity:0;transform:translateX(-50%)}
-  .moving .smoke{animation:puff 1.6s}
-  @keyframes puff{0%{opacity:.8;bottom:75px}100%{opacity:0;bottom:115px}}
-  main{max-width:640px;margin:10px auto 30px;padding:0 14px}
-  .card{background:var(--card);border-radius:22px;padding:22px;box-shadow:0 8px 24px rgba(0,0,0,.12);text-align:center}
-  .tag{display:inline-block;background:#fff1e6;color:#b8571a;padding:4px 12px;border-radius:99px;font-size:.85rem;font-weight:bold}
-  .q{font-size:clamp(1.2rem,4vw,1.6rem);margin:14px 0 18px}
-  .opts{display:grid;gap:10px}
-  button.opt{font:inherit;font-size:1.15rem;padding:14px;border-radius:14px;border:3px solid #cfd8e6;background:#f7faff;cursor:pointer;transition:.15s}
-  button.opt:hover{border-color:var(--accent);transform:translateY(-2px)}
-  button.opt.ok{background:#e3f7ea;border-color:var(--ok)}
-  button.opt.bad{background:#fdecea;border-color:var(--bad);animation:shake .3s}
-  @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-  .msg{min-height:1.6em;margin-top:12px;font-weight:bold}
-  .big{font-size:3.5rem;margin:6px 0}
-  .go{font:inherit;font-size:1.2rem;background:var(--accent);color:#fff;border:0;border-radius:14px;padding:14px 26px;cursor:pointer;margin-top:12px}
-  .ticket{border:3px dashed var(--accent);border-radius:18px;padding:18px;margin-top:10px}
-  .stars{font-size:2rem;letter-spacing:4px}
-  footer{text-align:center;font-size:.8rem;opacity:.6;padding-bottom:20px}
+/* Layout: one-screen game — track with train on top, question card, big answer buttons below */
+:root{
+  --bg:#eef5f1; --panel:#ffffff; --fg:#1f2d2a; --muted:#5d6f6a; --line:#cfded8;
+  --rail:#7a5a3c; --accent:#e4572e; --ok:#2e9e5b; --bad:#d64045;
+  --jud:#2f6fd6; --cri:#8a4fbf; --isl:#1f9a6b; --hin:#e98a15; --bud:#c9a20e;
+  --display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#14201d; --panel:#1d2c28; --fg:#eaf3ef; --muted:#9db3ac; --line:#2f433d; --rail:#b48a62;
+  --jud:#5b93f0; --cri:#b07de0; --isl:#3cc28e; --hin:#f5a33d; --bud:#e6c23a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#14201d; --panel:#1d2c28; --fg:#eaf3ef; --muted:#9db3ac; --line:#2f433d; --rail:#b48a62;
+  --jud:#5b93f0; --cri:#b07de0; --isl:#3cc28e; --hin:#f5a33d; --bud:#e6c23a; color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--display);font-size:18px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+h1{font-size:1.5rem;margin:0;font-weight:700;text-wrap:balance}
+.score{font-weight:600;font-variant-numeric:tabular-nums;background:var(--panel);border:2px solid var(--line);border-radius:999px;padding:4px 14px}
+.tabs{display:flex;gap:8px}
+.tab{font:inherit;font-size:.95rem;font-weight:600;border:2px solid var(--line);background:var(--panel);color:var(--fg);border-radius:12px;padding:6px 12px;cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+/* track */
+.track{position:relative;height:84px;background:var(--panel);border:2px solid var(--line);border-radius:16px;overflow:hidden}
+.rails{position:absolute;left:10px;right:10px;bottom:16px;height:10px;
+  background:repeating-linear-gradient(90deg,var(--rail) 0 6px,transparent 6px 22px);}
+.rails::before,.rails::after{content:"";position:absolute;left:0;right:0;height:3px;background:var(--rail)}
+.rails::before{top:0}.rails::after{bottom:0}
+.station{position:absolute;right:10px;bottom:28px;font-size:.75rem;font-weight:700;letter-spacing:.05em;color:var(--muted);text-align:center;line-height:1.1}
+.station b{display:block;font-size:1.6rem;line-height:1}
+.train{position:absolute;bottom:24px;left:6px;transition:left .7s cubic-bezier(.4,1.6,.5,1);width:96px}
+@media (prefers-reduced-motion:reduce){.train{transition:none}}
+/* card */
+.card{background:var(--panel);border:2px solid var(--line);border-radius:20px;padding:18px;text-align:center;display:flex;flex-direction:column;gap:6px}
+.cat{font-size:.85rem;font-weight:600;letter-spacing:.12em;color:var(--muted)}
+.q{font-size:1.15rem;font-weight:500;margin:0}
+.word{font-size:2rem;font-weight:700;margin:4px 0;line-height:1.1;text-wrap:balance}
+.fb{min-height:1.6em;font-weight:600}
+.fb.ok{color:var(--ok)}.fb.bad{color:var(--bad)}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ans{font:inherit;font-size:1.1rem;font-weight:600;border:3px solid var(--c,var(--line));background:var(--panel);color:var(--fg);
+  border-radius:16px;padding:12px 8px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;min-height:62px;text-align:center}
+.ans .ic{font-size:1.6rem;color:var(--c,var(--fg));line-height:1}
+.ans:last-child:nth-child(odd){grid-column:1/-1}
+.ans:focus-visible,.tab:focus-visible,.big:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.ans.right{background:var(--ok);border-color:var(--ok);color:#fff}.ans.right .ic{color:#fff}
+.ans.wrong{background:var(--bad);border-color:var(--bad);color:#fff;animation:shake .4s}.ans.wrong .ic{color:#fff}
+.ans:disabled{cursor:default}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.big{font:inherit;font-size:1.2rem;font-weight:700;background:var(--accent);color:#fff;border:0;border-radius:16px;padding:14px 22px;cursor:pointer}
+/* review table */
+.tablebox{overflow-x:auto;background:var(--panel);border:2px solid var(--line);border-radius:16px}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.95rem}
+th,td{padding:8px;border-bottom:1px solid var(--line);text-align:center}
+thead th{color:#fff;font-weight:700}
+tbody th{text-align:left;color:var(--muted);font-size:.8rem;letter-spacing:.08em}
+td.hide{color:transparent;background:repeating-linear-gradient(45deg,var(--line) 0 6px,transparent 6px 12px);cursor:pointer;border-radius:6px}
+.hint{color:var(--muted);font-size:.95rem;margin:0;text-align:center}
+.end{text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center}
+.stars{font-size:2.4rem;letter-spacing:4px;color:var(--bud)}
 </style>
-</head>
-<body>
-<header>
-  <h1>🚂 El Tren de las Religiones</h1>
-  <p class="sub">Responde bien para que el tren llegue a la siguiente estación</p>
-</header>
+</head><body>
 
-<div class="track" id="track">
-  <div class="rail"></div>
-  <div class="smoke">💨</div>
-  <div class="train" id="train">🚂</div>
+<div class="wrap">
+  <header>
+    <h1>El Tren de les Religions</h1>
+    <div class="tabs">
+      <button class="tab" id="tab-joc" aria-pressed="true">Jugar</button>
+      <button class="tab" id="tab-taula" aria-pressed="false">Repassar</button>
+    </div>
+  </header>
+
+  <section id="joc">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="track" aria-hidden="true">
+        <div class="rails"></div>
+        <div class="station"><b>⚑</b>ESTACIÓ</div>
+        <svg class="train" id="train" viewBox="0 0 96 44">
+          <rect x="4" y="12" width="40" height="22" rx="4" fill="var(--accent)"/>
+          <rect x="30" y="2" width="14" height="14" rx="2" fill="var(--accent)"/>
+          <rect x="33" y="5" width="8" height="7" rx="1" fill="var(--panel)"/>
+          <rect x="10" y="4" width="8" height="10" rx="1" fill="var(--fg)"/>
+          <rect x="50" y="16" width="40" height="18" rx="4" fill="var(--isl)"/>
+          <rect x="44" y="24" width="6" height="3" fill="var(--fg)"/>
+          <circle cx="14" cy="36" r="6" fill="var(--fg)"/><circle cx="34" cy="36" r="6" fill="var(--fg)"/>
+          <circle cx="60" cy="36" r="6" fill="var(--fg)"/><circle cx="80" cy="36" r="6" fill="var(--fg)"/>
+        </svg>
+      </div>
+      <div class="score" id="score" style="align-self:center">Pregunta 1 de 10 · ★ 0</div>
+      <div id="stage"></div>
+    </div>
+  </section>
+
+  <section id="taula" hidden>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <p class="hint">Toca els quadres ratllats per descobrir la resposta. Intenta dir-la abans!</p>
+      <div class="tablebox"><table id="tbl"></table></div>
+      <button class="big" id="tapa" style="align-self:center">Tapar-ho tot</button>
+    </div>
+  </section>
 </div>
 
-<main><div class="card" id="card"></div></main>
-<footer>Demo de juego de repaso · Hecho en casa con mucho cariño</footer>
-
 <script>
-const STATIONS = [
-  {name:"Cristianismo", ico:"✝️", fact:"Los cristianos siguen las enseñanzas de Jesús y rezan en iglesias.",
-   qs:[["¿Cómo se llama el libro sagrado de los cristianos?","La Biblia",["El Corán","La Torá"]],
-       ["¿Qué fiesta celebra el nacimiento de Jesús?","La Navidad",["El Diwali","El Ramadán"]]]},
-  {name:"Judaísmo", ico:"✡️", fact:"En Janucá, la fiesta de las luces, los judíos encienden las velas de un candelabro.",
-   qs:[["¿Dónde rezan los judíos?","En la sinagoga",["En la mezquita","En la pagoda"]],
-       ["¿Cuál es el símbolo del judaísmo?","La estrella de David",["La media luna","La rueda"]]]},
-  {name:"Islam", ico:"☪️", fact:"Los musulmanes rezan en la mezquita y su profeta es Mahoma.",
-   qs:[["¿Cómo se llama el libro sagrado del islam?","El Corán",["La Biblia","Los Vedas"]],
-       ["¿En qué mes ayunan los musulmanes?","En el Ramadán",["En Navidad","En Janucá"]]]},
-  {name:"Hinduismo", ico:"🕉️", fact:"El hinduismo es una de las religiones más antiguas del mundo.",
-   qs:[["¿En qué país nació el hinduismo?","En la India",["En Japón","En Egipto"]],
-       ["¿Cómo se llama la fiesta de las luces hindú?","El Diwali",["La Pascua","El Ramadán"]]]},
-  {name:"Budismo", ico:"☸️", fact:"Buda significa «el que ha despertado».",
-   qs:[["¿Quién fundó el budismo?","Buda",["Moisés","Mahoma"]],
-       ["¿Qué hacen los budistas para calmar la mente?","Meditar",["Correr","Cantar villancicos"]]]}
+const R=[
+ {id:"jud",nom:"Judaisme",ic:"✡",c:"var(--jud)"},
+ {id:"cri",nom:"Cristianisme",ic:"✝",c:"var(--cri)"},
+ {id:"isl",nom:"Islam",ic:"☪",c:"var(--isl)"},
+ {id:"hin",nom:"Hinduisme",ic:"ॐ",c:"var(--hin)"},
+ {id:"bud",nom:"Budisme",ic:"☸",c:"var(--bud)"}
 ];
+const CATS=[
+ {k:"simbol",nom:"SÍMBOL",q:"Quin és el símbol"},
+ {k:"temple",nom:"TEMPLE",q:"On preguen? Quin és el temple"},
+ {k:"festa",nom:"FESTA",q:"Quina és la festa"},
+ {k:"ritu",nom:"RITU",q:"Quin és el ritu"},
+ {k:"pers",nom:"PERSONATGE IMPORTANT",q:"Qui és el personatge important"}
+];
+const D={
+ jud:{simbol:"Menorà",temple:"Sinagoga",festa:"Pésah",ritu:"Rentar-se les mans",pers:"Moisès"},
+ cri:{simbol:"Creu",temple:"Església",festa:"Nadal",ritu:"Eucaristia",pers:"Jesús"},
+ isl:{simbol:"Mitja lluna i estel",temple:"Mesquita",festa:"Festa del Xai",ritu:"Salat",pers:"Mahoma"},
+ hin:{simbol:"Om",temple:"Temple hindú",festa:"Diwali",ritu:"Ofrena a les divinitats",pers:null},
+ bud:{simbol:"Roda del Dharma",temple:"Temple budista",festa:"Vesak",ritu:"Mandala",pers:"Siddharta (Buda)"}
+};
+const de=n=>/^[AEIOUH]/i.test(n)?"de l'":"del ";
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const $=s=>document.getElementById(s);
+let AC;function beep(ok){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+ const notes=ok?[523,659,784]:[220,180];notes.forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain();
+ o.frequency.value=f;o.type=ok?"triangle":"square";g.gain.setValueAtTime(.12,AC.currentTime+i*.1);
+ g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+i*.1+.18);o.connect(g).connect(AC.destination);o.start(AC.currentTime+i*.1);o.stop(AC.currentTime+i*.1+.2)})}catch(e){}}
 
-const track = document.getElementById("track"), train = document.getElementById("train"), card = document.getElementById("card");
-let st = 0, qi = 0, mistakes = 0;
-const pos = i => 8 + i * (84 / (STATIONS.length - 1)); // %
-
-STATIONS.forEach((s,i)=>{
-  const d=document.createElement("div"); d.className="station"; d.id="st"+i;
-  d.style.left=pos(i)+"%"; d.innerHTML=`<span class="ico">${s.ico}</span>${s.name}`;
-  track.appendChild(d);
-});
-const shuffle = a => a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
-function placeTrain(i){ train.style.left = (i<0? 2 : pos(i)) + "%"; }
-
-function start(){
-  st=0; qi=0; mistakes=0; placeTrain(-1);
-  document.querySelectorAll(".station").forEach(e=>e.classList.remove("done"));
-  card.innerHTML=`<div class="big">🎫</div><p class="q">¡Pasajeros al tren!<br>Vamos a visitar 5 estaciones.</p>
-  <button class="go" onclick="ask()">¡Arrancar! 🚂</button>`;
-}
-
-function ask(){
-  const s=STATIONS[st], [q,right,wrong]=s.qs[qi];
-  card.innerHTML=`<span class="tag">Próxima estación: ${s.ico} ${s.name} · pregunta ${qi+1}/2</span>
-  <p class="q">${q}</p><div class="opts"></div><div class="msg" id="msg"></div>`;
-  const box=card.querySelector(".opts");
-  shuffle([right,...wrong]).forEach(o=>{
-    const b=document.createElement("button"); b.className="opt"; b.textContent=o;
-    b.onclick=()=>answer(b,o===right); box.appendChild(b);
+const N=10;let qs=[],n=0,stars=0;
+function build(){
+  const all=[];
+  R.forEach(r=>CATS.forEach(c=>{const v=D[r.id][c.k];if(v)all.push({r,c,v})}));
+  return shuffle(all).slice(0,N).map((it,i)=>{
+    if(i%2===0) return {type:"which",...it};               // "A quina religió pertany X?"
+    const others=shuffle(R.filter(x=>x.id!==it.r.id&&D[x.id][it.c.k])).slice(0,2).map(x=>D[x.id][it.c.k]);
+    return {type:"what",...it,opts:shuffle([it.v,...others])}; // "Quin és el temple del Judaisme?"
   });
 }
-
-function answer(b,ok){
-  const msg=document.getElementById("msg");
-  if(!ok){ mistakes++; b.classList.add("bad"); b.disabled=true; msg.style.color="var(--bad)"; msg.textContent="¡Uy! Casi. Prueba otra vez 💪"; return; }
-  b.classList.add("ok"); card.querySelectorAll(".opt").forEach(x=>x.disabled=true);
-  msg.style.color="var(--ok)"; msg.textContent="¡Correcto! ⭐";
-  setTimeout(()=>{ qi++; if(qi<2) ask(); else arrive(); },800);
+function moveTrain(){const t=$("train"),tr=t.parentElement;const max=tr.clientWidth-t.clientWidth-80;
+  t.style.left=(6+max*stars/N)+"px"}
+function start(){qs=build();n=0;stars=0;moveTrain();show()}
+function show(){
+  const s=$("stage");$("score").textContent=`Pregunta ${n+1} de ${N} · ★ ${stars}`;
+  const q=qs[n];let h='<div style="display:flex;flex-direction:column;gap:12px"><div class="card">';
+  h+=`<div class="cat">${q.c.nom}</div>`;
+  if(q.type==="which"){
+    h+=`<p class="q">A quina religió pertany…</p><div class="word">${q.v}</div>`;
+    h+='<div class="fb" id="fb"></div></div><div class="answers">';
+    R.forEach(r=>h+=`<button class="ans" style="--c:${r.c}" data-v="${r.id}"><span class="ic">${r.ic}</span>${r.nom}</button>`);
+  }else{
+    h+=`<p class="q">${q.c.q} ${de(q.r.nom)}</p><div class="word" style="color:${q.r.c}">${q.r.ic} ${q.r.nom}?</div>`;
+    h+='<div class="fb" id="fb"></div></div><div class="answers">';
+    q.opts.forEach(o=>h+=`<button class="ans" data-v="${o}">${o}</button>`);
+  }
+  s.innerHTML=h+'</div></div>';
+  s.querySelectorAll(".ans").forEach(b=>b.onclick=()=>answer(b));
+}
+function answer(b){
+  const q=qs[n],good=q.type==="which"?q.r.id:q.v,ok=b.dataset.v===good,fb=$("fb");
+  document.querySelectorAll(".ans").forEach(x=>{x.disabled=true;if(x.dataset.v===good)x.classList.add("right")});
+  if(ok){stars++;fb.className="fb ok";fb.textContent=["Molt bé!","Genial!","Correcte!","Xiu-xiu! El tren avança!"][Math.random()*4|0];moveTrain()}
+  else{b.classList.add("wrong");fb.className="fb bad";
+    fb.textContent=q.type==="which"?`És ${de(q.r.nom)}${q.r.nom}`:`Era: ${q.v}`}
+  beep(ok);$("score").textContent=`Pregunta ${n+1} de ${N} · ★ ${stars}`;
+  setTimeout(()=>{n++;n<N?show():end()},ok?1100:2200);
+}
+function end(){
+  const msg=stars>=9?"Ets el maquinista campió!":stars>=6?"Molt bon viatge!":"Tornem a pujar al tren?";
+  $("score").textContent=`Final · ★ ${stars} de ${N}`;
+  $("stage").innerHTML=`<div class="card end"><div class="cat">HAS ARRIBAT A L'ESTACIÓ</div>
+   <div class="stars">${"★".repeat(Math.round(stars/2))}${"☆".repeat(5-Math.round(stars/2))}</div>
+   <div class="word">${stars} de ${N}</div><p class="q">${msg}</p>
+   <button class="big" id="again">Tornar a jugar</button></div>`;
+  $("again").onclick=start;
 }
 
-function arrive(){
-  const s=STATIONS[st];
-  track.classList.add("moving"); placeTrain(st);
-  setTimeout(()=>{
-    track.classList.remove("moving");
-    document.getElementById("st"+st).classList.add("done");
-    const last = st===STATIONS.length-1;
-    card.innerHTML=`<div class="big">${s.ico}</div><p class="q">¡Has llegado a la estación<br><b>${s.name}</b>!</p>
-    <p>💡 ${s.fact}</p>
-    <button class="go" onclick="${last?'finish()':'next()'}">${last?'Ver mi billete 🎫':'Siguiente estación ➡️'}</button>`;
-  },1600);
+/* review table */
+function table(){
+  let h='<thead><tr><th style="background:none"></th>'+R.map(r=>`<th style="background:${r.c}">${r.ic}<br>${r.nom}</th>`).join("")+'</tr></thead><tbody>';
+  CATS.forEach(c=>{h+=`<tr><th>${c.nom}</th>`+R.map(r=>{const v=D[r.id][c.k];return v?`<td class="hide" tabindex="0">${v}</td>`:'<td>—</td>'}).join("")+'</tr>'});
+  $("tbl").innerHTML=h+'</tbody>';
+  $("tbl").querySelectorAll("td.hide").forEach(td=>{const f=()=>td.classList.remove("hide");td.onclick=f;td.onkeydown=e=>{if(e.key==="Enter"||e.key===" ")f()}});
 }
-function next(){ st++; qi=0; ask(); }
-
-function finish(){
-  const stars = mistakes===0?3:mistakes<=3?2:1;
-  card.innerHTML=`<div class="ticket"><div class="big">🏆</div>
-  <p class="q">¡Viaje completado!</p>
-  <div class="stars">${"⭐".repeat(stars)}${"☆".repeat(3-stars)}</div>
-  <p>Has visitado las 5 estaciones: ${STATIONS.map(s=>s.ico).join(" ")}</p>
-  <p>Fallos: ${mistakes}</p></div>
-  <button class="go" onclick="start()">Volver a jugar 🔁</button>`;
-}
-start();
+$("tapa").onclick=table;
+function tab(which){$("joc").hidden=which!=="joc";$("taula").hidden=which!=="taula";
+  $("tab-joc").setAttribute("aria-pressed",which==="joc");$("tab-taula").setAttribute("aria-pressed",which==="taula");if(which==="joc")moveTrain()}
+$("tab-joc").onclick=()=>tab("joc");$("tab-taula").onclick=()=>tab("taula");
+window.addEventListener("resize",moveTrain);
+table();start();
 </script>
-</body>
-</html>
+
+</body></html>
