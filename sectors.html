@@ -1,0 +1,352 @@
+<!doctype html><html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>El Tren dels Sectors Econòmics</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#f1f4ee; --panel:#fff; --fg:#22302b; --muted:#5f6f69; --line:#d5ddd6; --rail:#7a5a3c;
+  --accent:#e4572e; --ok:#2e9e5b; --bad:#d64045; --dock:#e6e9df;
+  --pri:#d64045; --sec:#2f6fd6; --ter:#d49a00;
+  --display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--display);font-size:18px;padding:12px 16px 30px;-webkit-user-select:none;user-select:none}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+h1{font-size:1.45rem;margin:0}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{font:inherit;font-size:.9rem;font-weight:600;border:2px solid var(--line);background:var(--panel);color:var(--fg);border-radius:12px;padding:6px 11px;cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.pill{font-weight:600;background:var(--panel);border:2px solid var(--line);border-radius:999px;padding:4px 14px;align-self:center}
+/* track */
+.track{position:relative;height:118px;background:var(--panel);border:2px solid var(--line);border-radius:16px;overflow:hidden}
+.rails{position:absolute;left:10px;right:10px;bottom:16px;height:10px;background:repeating-linear-gradient(90deg,var(--rail) 0 6px,transparent 6px 22px)}
+.rails::before,.rails::after{content:"";position:absolute;left:0;right:0;height:3px;background:var(--rail)}
+.rails::before{top:0}.rails::after{bottom:0}
+.station{position:absolute;right:10px;top:6px;font-size:.72rem;font-weight:700;color:var(--muted);text-align:center;line-height:1.1}
+.station b{display:block;font-size:1.6rem;line-height:1}
+.train{position:absolute;bottom:24px;left:6px;width:96px;z-index:2;transition:left .7s cubic-bezier(.4,1.6,.5,1)}
+/* quiz card */
+.card{background:var(--panel);border:2px solid var(--line);border-radius:20px;padding:18px;text-align:center;display:flex;flex-direction:column;gap:6px}
+.cat{font-size:.8rem;font-weight:600;letter-spacing:.12em;color:var(--muted)}
+.q{font-size:1.2rem;font-weight:600;margin:0;text-wrap:balance}
+.word{font-size:1.9rem;font-weight:700;margin:4px 0;line-height:1.1}
+.fb{min-height:1.6em;font-weight:600}.fb.ok{color:var(--ok)}.fb.bad{color:var(--bad)}
+.answers{display:grid;grid-template-columns:1fr;gap:10px}
+.ans{font:inherit;font-size:1.05rem;font-weight:600;border:3px solid var(--c,var(--line));background:var(--panel);color:var(--fg);border-radius:16px;padding:12px;cursor:pointer;min-height:56px;display:flex;align-items:center;justify-content:center;gap:8px}
+.answers.sect{grid-template-columns:repeat(3,1fr)}
+.answers.sect .ans{flex-direction:column;gap:2px;font-size:.95rem}
+.ans .ic{font-size:1.6rem;line-height:1}
+.ans.right{background:var(--ok);border-color:var(--ok);color:#fff}
+.ans.wrong{background:var(--bad);border-color:var(--bad);color:#fff;animation:shake .4s}
+.ans:disabled{cursor:default}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.big{font:inherit;font-size:1.15rem;font-weight:700;background:var(--accent);color:#fff;border:0;border-radius:16px;padding:13px 22px;cursor:pointer;align-self:center}
+.stars{font-size:2.4rem;letter-spacing:4px;color:var(--ter)}
+/* wagons game */
+.rounds{display:flex;gap:6px;flex-wrap:wrap}
+.rb{font:inherit;font-size:.82rem;font-weight:600;letter-spacing:.05em;border:2px solid var(--line);background:var(--panel);color:var(--muted);border-radius:10px;padding:5px 10px;cursor:pointer}
+.rb.done{color:var(--ok);border-color:var(--ok)}
+.rb[aria-current="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.task{margin:0;font-size:1.08rem;text-align:center}.task b{color:var(--accent)}
+.plat{position:relative;background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:8px 10px 18px;overflow:hidden;display:flex;align-items:center;gap:8px;min-height:66px;transition:border-color .2s,background .2s}
+.plat.hover{border-color:var(--c);background:color-mix(in srgb,var(--c) 12%,var(--panel))}
+.plat.pick{cursor:pointer}
+.plat::after{content:"";position:absolute;left:8px;right:8px;bottom:6px;height:5px;background:repeating-linear-gradient(90deg,var(--rail) 0 4px,transparent 4px 14px);border-top:2px solid var(--rail)}
+.loco{flex:none;width:58px;height:42px;position:relative}
+.loco .body{position:absolute;inset:10px 0 0 0;background:var(--c);border-radius:6px 10px 4px 4px}
+.loco .cab{position:absolute;left:0;top:0;width:24px;height:22px;background:var(--c);border-radius:4px}
+.loco .ic{position:absolute;inset:10px 0 0 20px;display:grid;place-items:center;font-size:1.2rem}
+.name{flex:none;width:92px;font-weight:700;font-size:.92rem;color:var(--c);line-height:1.1}
+.wagons{display:flex;gap:6px;flex-wrap:wrap;flex:1;min-width:0}
+.wagon{border:2px dashed var(--c);border-radius:8px;padding:4px 8px;font-size:.82rem;font-weight:600;min-width:52px;min-height:30px;display:flex;align-items:center;color:var(--muted)}
+.wagon.full{border-style:solid;background:var(--c);color:#fff}
+.plat.go .loco,.plat.go .name,.plat.go .wagons{transform:translateX(120vw);transition:transform 1.6s cubic-bezier(.5,0,.8,.4)}
+.dock{background:var(--dock);border-radius:16px;padding:12px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;min-height:72px}
+.crate{font:inherit;font-size:1.05rem;font-weight:600;background:var(--panel);color:var(--fg);border:3px solid var(--fg);border-radius:12px;padding:9px 14px;cursor:grab;touch-action:none;box-shadow:0 3px 0 var(--fg)}
+.crate.sel{background:var(--accent);border-color:var(--accent);color:#fff}
+.crate.drag{position:fixed;z-index:20;pointer-events:none;transform:rotate(-4deg) scale(1.06)}
+.crate.ghost{opacity:.25}
+.crate.shake{animation:shake .45s}
+.help{color:var(--muted);font-size:.88rem;text-align:center;margin:0}
+/* review */
+.rev{display:grid;gap:12px}
+.rcard{background:var(--panel);border:3px solid var(--c);border-radius:18px;padding:14px 16px}
+.rcard h2{margin:0 0 4px;color:var(--c);font-size:1.25rem}
+.rcard p{margin:4px 0;line-height:1.4}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{background:color-mix(in srgb,var(--c) 14%,#fff);border-radius:999px;padding:3px 10px;font-size:.88rem;font-weight:600}
+.tablebox{background:var(--panel);border:2px solid var(--line);border-radius:16px;overflow:hidden}
+table{border-collapse:collapse;width:100%;font-size:.98rem}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
+thead th{background:var(--fg);color:#fff}
+td.hide{color:transparent;background:repeating-linear-gradient(45deg,var(--line) 0 6px,transparent 6px 12px);cursor:pointer}
+.hint{color:var(--muted);font-size:.92rem;margin:0;text-align:center}
+@media (max-width:520px){.name{width:62px;font-size:.7rem}.loco{width:44px}.answers.sect .ans{font-size:.85rem}}
+@media (prefers-reduced-motion:reduce){.train,.plat.go .loco,.plat.go .name,.plat.go .wagons{transition:none}}
+[hidden]{display:none!important}
+</style>
+</head><body>
+<div class="wrap">
+  <header>
+    <h1>🚂 El Tren dels Sectors</h1>
+    <div class="tabs">
+      <button class="tab" data-t="joc" aria-pressed="true">Preguntes</button>
+      <button class="tab" data-t="vag" aria-pressed="false">Vagons</button>
+      <button class="tab" data-t="rep" aria-pressed="false">Repassar</button>
+    </div>
+  </header>
+
+  <!-- QUIZ -->
+  <section id="joc" style="display:flex;flex-direction:column;gap:14px">
+    <div class="track" aria-hidden="true">
+      <div class="rails"></div>
+      <div class="station" style="right:auto;left:30%"><b>🌾</b>PRIMARI</div><div class="station" style="right:auto;left:55%"><b>🏭</b>SECUNDARI</div><div class="station"><b>🛒</b>TERCIARI</div>
+      <svg class="train" id="train" viewBox="0 0 110 44">
+        <rect x="4" y="12" width="36" height="22" rx="4" fill="var(--accent)"/>
+        <rect x="26" y="2" width="14" height="14" rx="2" fill="var(--accent)"/>
+        <rect x="29" y="5" width="8" height="7" rx="1" fill="#fff"/>
+        <rect x="9" y="4" width="8" height="10" rx="1" fill="var(--fg)"/>
+        <rect x="44" y="16" width="20" height="18" rx="3" fill="var(--pri)"/>
+        <rect x="66" y="16" width="20" height="18" rx="3" fill="var(--sec)"/>
+        <rect x="88" y="16" width="20" height="18" rx="3" fill="var(--ter)"/>
+        <circle cx="13" cy="36" r="6" fill="var(--fg)"/><circle cx="31" cy="36" r="6" fill="var(--fg)"/>
+        <circle cx="54" cy="37" r="5" fill="var(--fg)"/><circle cx="76" cy="37" r="5" fill="var(--fg)"/><circle cx="98" cy="37" r="5" fill="var(--fg)"/>
+      </svg>
+    </div>
+    <div class="pill" id="score">Pregunta 1 de 12 · ★ 0</div>
+    <div id="stage"></div>
+  </section>
+
+  <!-- WAGONS -->
+  <section id="vag" hidden style="flex-direction:column;gap:12px">
+    <nav class="rounds" id="rounds"></nav>
+    <p class="task" id="task"></p>
+    <div id="station" style="display:flex;flex-direction:column;gap:8px"></div>
+    <p class="fb" id="vfb" style="text-align:center;margin:0"></p>
+    <div class="dock" id="dock"></div>
+    <p class="help">Arrossega cada caixa fins al seu tren, o toca la caixa i després el tren.</p>
+  </section>
+
+  <!-- REVIEW -->
+  <section id="rep" hidden style="flex-direction:column;gap:12px">
+    <div class="rev" id="revcards"></div>
+    <div class="rcard" style="--c:var(--pri)">
+      <h2>🌾 Les activitats del sector primari</h2>
+      <p><b>Agricultura:</b> el cultiu de la terra. Pot ser de <b>regadiu</b> (es rega) o de <b>secà</b> (només aigua de pluja).</p>
+      <p><b>Ramaderia:</b> la cria de bestiar: <b>boví</b> (vaques), <b>oví</b> (ovelles), <b>porcí</b> (porcs) i <b>aviram</b> (gallines).</p>
+      <p><b>Silvicultura:</b> el cultiu, la cura i l'explotació de muntanyes i boscos.</p>
+      <p><b>Pesca:</b> la captura de peixos i altres animals aquàtics. <b>Fluvial</b> (rius) o <b>marítima</b> (mars).</p>
+      <p><b>Mineria:</b> l'obtenció de recursos minerals del sòl: ferro, or, marbre, granit, petroli, gas, carbó…</p>
+    </div>
+    <div class="rcard" style="--c:var(--fg)">
+      <h2>👥 La població</h2>
+      <p><b>Població activa:</b> les persones que treballen a canvi d'un sou o que busquen feina.</p>
+      <p><b>Població inactiva:</b> les persones que no poden treballar: els nens, els estudiants i els jubilats.</p>
+    </div>
+    <p class="hint">D'on prové? Toca els quadres ratllats per descobrir la matèria primera. Intenta dir-la abans!</p>
+    <div class="tablebox"><table id="tbl"></table></div>
+    <button class="big" id="tapa">Tapar-ho tot</button>
+  </section>
+</div>
+
+<script>
+const S={
+ pri:{id:"pri",nom:"Primari",ic:"🌾",c:"var(--pri)",def:"Obté les <b>matèries primeres</b> de la natura.",act:["agricultura","ramaderia","silvicultura","pesca","mineria"]},
+ sec:{id:"sec",nom:"Secundari",ic:"🏭",c:"var(--sec)",def:"<b>Transforma</b> les matèries primeres en <b>productes elaborats</b>.",act:["indústria","construcció","artesania","producció d'energia"]},
+ ter:{id:"ter",nom:"Terciari",ic:"🛒",c:"var(--ter)",def:"També es diu <b>sector de serveis</b>: ofereix serveis a les persones.",act:["educació","sanitat","transport","comerç","turisme","comunicacions"]}
+};
+const SL=[S.pri,S.sec,S.ter];
+const OFICIS={
+ pri:["pagès","ramader","pescador","miner"],
+ sec:["fuster","artesà","paleta","joier","torner","constructor","forner"],
+ ter:["conductor","escombriaire","metge","botiguer","maquinista","mestre","policia","recepcionista","aviador","bomber"]
+};
+// [producte, matèria primera]
+const ORIGEN=[
+ ["l'hamburguesa","la carn de vaca"],["el jersei de llana","l'ovella"],["la barra de pa","el blat"],["el paper","la fusta dels arbres"],
+ ["la mantega","la llet"],["el iogurt","la llet"],["la mina del llapis","el grafit"],["la xocolata","el cacau"],["el fuet","el porc"],
+ ["la roba de cotó","el cotó"],["el quetxup","el tomàquet"],["els cables elèctrics","el coure"],["les rodes","el cautxú"],["la colònia","la farigola"],
+ ["el formatge","la llet"],["els cotxes","el ferro"],["les galetes","el blat"]
+];
+const FIXES=[
+ ["Què fa el sector primari?","Obté matèries primeres de la natura",["Transforma les matèries primeres","Ofereix serveis a les persones"]],
+ ["Què fa el sector secundari?","Transforma les matèries primeres en productes elaborats",["Obté matèries primeres de la natura","Ofereix serveis a les persones"]],
+ ["Què fa el sector terciari?","Ofereix serveis a les persones",["Obté matèries primeres de la natura","Fabrica productes a les fàbriques"]],
+ ["Com es diu també el sector terciari?","Sector de serveis",["Sector de les fàbriques","Sector de la terra"]],
+ ["Què és la població activa?","Les persones que treballen o busquen feina",["Els nens i els estudiants","Els jubilats"]],
+ ["Qui forma part de la població inactiva?","Els nens, els estudiants i els jubilats",["Els metges i els mestres","Els pagesos i els pescadors"]],
+ ["Com es diu la persona que treballa en una mina?","Miner",["Fuster","Ramader"]],
+ ["Com es diu la persona que cuida i alimenta els animals?","Ramader",["Pescador","Botiguer"]],
+ ["Com es diu el material que ve de la natura i després es transforma?","Matèria primera",["Producte elaborat","Servei"]],
+ ["De quin animal prové principalment la llana?","De l'ovella",["De la vaca","Del porc"]],
+ ["Què és el treball?","Una activitat que fem a canvi d'un sou o un benefici",["Un joc per passar l'estona","Anar a comprar al supermercat"]],
+ ["Què és l'agricultura?","El cultiu de la terra",["La cria d'animals","La captura de peixos"]],
+ ["Què és la ramaderia?","La cria de bestiar (animals)",["El cultiu de la terra","L'obtenció de minerals"]],
+ ["Què és la silvicultura?","El cultiu, la cura i l'explotació dels boscos i muntanyes",["La captura de peixos al mar","La fabricació de mobles"]],
+ ["Què és la mineria?","L'obtenció de recursos minerals del sòl",["El cultiu de la terra","La cria de bestiar"]],
+ ["Quins són els dos tipus de cultiu de l'agricultura?","De regadiu i de secà",["De mar i de riu","Boví i oví"]],
+ ["Un cultiu que només rep l'aigua de la pluja és de…","Secà",["Regadiu","Pesca"]],
+ ["Un cultiu que es rega és de…","Regadiu",["Secà","Silvicultura"]],
+ ["Com es diu la pesca que es fa als rius?","Pesca fluvial",["Pesca marítima","Pesca de secà"]],
+ ["Com es diu la pesca que es fa al mar?","Pesca marítima",["Pesca fluvial","Pesca de regadiu"]],
+ ["La ramaderia de vaques és…","Bovina",["Ovina","Porcina"]],
+ ["La ramaderia d'ovelles és…","Ovina",["Bovina","Aviram"]],
+ ["La ramaderia de porcs és…","Porcina",["Ovina","Bovina"]],
+ ["Les gallines i els pollastres són…","Aviram",["Bestiar boví","Bestiar porcí"]],
+ ["Quin d'aquests s'obté de la mineria?","El carbó",["El blat","La llana"]],
+ ["La producció d'energia, a quin sector pertany?","Al sector secundari",["Al sector primari","Al sector terciari"]],
+ ["On es transformen les matèries primeres?","A les fàbriques i als tallers",["Als camps i al mar","A les botigues"]]
+];
+const $=s=>document.getElementById(s);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+let AC;function tone(ok){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+ (ok?[523,659,784]:[220,180]).forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+i*.1;
+ o.type=ok?"triangle":"square";o.frequency.value=f;g.gain.setValueAtTime(.1,t);g.gain.exponentialRampToValueAtTime(.001,t+.18);
+ o.connect(g).connect(AC.destination);o.start(t);o.stop(t+.2)})}catch(e){}}
+function whistle(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),o2=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime;
+ o.frequency.value=587;o2.frequency.value=740;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.12,t+.08);
+ g.gain.setValueAtTime(.12,t+.7);g.gain.exponentialRampToValueAtTime(.0001,t+1);o.connect(g);o2.connect(g);g.connect(AC.destination);
+ o.start(t);o2.start(t);o.stop(t+1);o2.stop(t+1)}catch(e){}}
+
+/* ---------- QUIZ ---------- */
+const N=12;let qs=[],n=0,stars=0;
+function build(){
+  const out=[];
+  shuffle(FIXES).slice(0,5).forEach(([q,a,w])=>out.push({type:"opt",cat:"CONCEPTES",q,a,opts:shuffle([a,...w])}));
+  const all=[];SL.forEach(s=>OFICIS[s.id].forEach(o=>all.push({v:o,s:s.id,k:"OFICI"})));
+  SL.forEach(s=>s.act.forEach(a=>all.push({v:a,s:s.id,k:"ACTIVITAT"})));
+  shuffle(all).slice(0,4).forEach(it=>out.push({type:"sect",cat:it.k,q:it.k==="OFICI"?"A quin sector pertany l'ofici de…":"A quin sector pertany…",word:it.v,a:it.s}));
+  shuffle(ORIGEN).slice(0,3).forEach(([p,m])=>{
+    const others=shuffle([...new Set(ORIGEN.map(x=>x[1]).filter(x=>x!==m))]).slice(0,2);
+    out.push({type:"opt",cat:"D'ON PROVÉ?",q:`D'on ${/^(els|les) /.test(p)?"provenen":"prové"} ${p}?`,a:cap(m),opts:shuffle([cap(m),...others.map(cap)])});
+  });
+  return shuffle(out);
+}
+function moveTrain(){const t=$("train"),tr=t.parentElement;const max=tr.clientWidth-t.clientWidth-14;t.style.left=(6+Math.max(0,max)*stars/N)+"px"}
+function start(){qs=build();n=0;stars=0;moveTrain();show()}
+function show(){
+  $("score").textContent=`Pregunta ${n+1} de ${N} · ★ ${stars}`;
+  const q=qs[n];let h=`<div style="display:flex;flex-direction:column;gap:12px"><div class="card"><div class="cat">${q.cat}</div>`;
+  if(q.type==="sect"){
+    h+=`<p class="q">${q.q}</p><div class="word">${cap(q.word)}</div><div class="fb" id="fb"></div></div><div class="answers sect">`;
+    SL.forEach(s=>h+=`<button class="ans" style="--c:${s.c}" data-v="${s.id}"><span class="ic">${s.ic}</span>${s.nom}</button>`);
+  }else{
+    h+=`<p class="q">${q.q}</p><div class="fb" id="fb"></div></div><div class="answers">`;
+    q.opts.forEach(o=>h+=`<button class="ans" data-v="${o}">${o}</button>`);
+  }
+  $("stage").innerHTML=h+"</div></div>";
+  $("stage").querySelectorAll(".ans").forEach(b=>b.onclick=()=>answer(b));
+}
+function answer(b){
+  const q=qs[n],ok=b.dataset.v===q.a,fb=$("fb");
+  document.querySelectorAll("#stage .ans").forEach(x=>{x.disabled=true;if(x.dataset.v===q.a)x.classList.add("right")});
+  if(ok){stars++;fb.className="fb ok";fb.textContent=["Molt bé!","Genial!","Correcte!","Xiu-xiu! El tren avança!"][Math.random()*4|0];moveTrain()}
+  else{b.classList.add("wrong");fb.className="fb bad";fb.textContent=q.type==="sect"?`És del sector ${S[q.a].nom.toLowerCase()}`:`Era: ${q.a}`}
+  tone(ok);$("score").textContent=`Pregunta ${n+1} de ${N} · ★ ${stars}`;
+  setTimeout(()=>{n++;n<N?show():end()},ok?1100:2300);
+}
+function end(){
+  const msg=stars>=11?"Ets el maquinista campió!":stars>=8?"Molt bon viatge!":"Tornem a pujar al tren?";
+  const st=Math.round(stars/N*5);
+  $("score").textContent=`Final · ★ ${stars} de ${N}`;
+  $("stage").innerHTML=`<div class="card"><div class="cat">HAS ARRIBAT A L'ESTACIÓ</div><div class="stars">${"★".repeat(st)}${"☆".repeat(5-st)}</div>
+   <div class="word">${stars} de ${N}</div><p class="q">${msg}</p><button class="big" id="again">Tornar a jugar</button></div>`;
+  $("again").onclick=start;
+}
+
+/* ---------- WAGONS ---------- */
+const PRIM=[
+ {id:"agr",nom:"Agricultura",ic:"🌾",c:"#3f9a3f",msg:"de l'agricultura",items:["blat","tomàquets","fruita","cotó","cacau"]},
+ {id:"ram",nom:"Ramaderia",ic:"🐄",c:"#c2603a",msg:"de la ramaderia",items:["vaques","ovelles","porcs","gallines"]},
+ {id:"sil",nom:"Silvicultura",ic:"🌲",c:"#2f7d63",msg:"de la silvicultura",items:["fusta","suro","boscos"]},
+ {id:"pes",nom:"Pesca",ic:"🐟",c:"#2f6fd6",msg:"de la pesca",items:["peixos","musclos","gambes"]},
+ {id:"min",nom:"Mineria",ic:"⛏️",c:"#6b5a4a",msg:"de la mineria",items:["carbó","ferro","or","marbre","granit","petroli"]}
+];
+const ROUNDS=[
+ {nom:"OFICIS",t:"els <b>oficis</b>",make:()=>SL.flatMap(s=>shuffle(OFICIS[s.id]).slice(0,3).map(v=>({r:s.id,v})))},
+ {nom:"ACTIVITATS",t:"les <b>activitats</b>",make:()=>SL.flatMap(s=>s.act.map(v=>({r:s.id,v})))},
+ {nom:"SECTOR PRIMARI",t:"cada cosa al tren de la seva <b>activitat del sector primari</b>",trains:PRIM,make:()=>PRIM.flatMap(t=>shuffle(t.items).slice(0,2).map(v=>({r:t.id,v})))},
+ {nom:"TOT BARREJAT",t:"<b>oficis i activitats</b> barrejats",make:()=>shuffle(SL.flatMap(s=>[...OFICIS[s.id],...s.act].map(v=>({r:s.id,v})))).slice(0,10)}
+];
+let cur=0,done=new Set(),cards=[],sel=null,TR=[];
+function rounds(){
+  $("rounds").innerHTML=ROUNDS.map((c,i)=>`<button class="rb${done.has(i)?" done":""}" aria-current="${i===cur}" data-i="${i}">${done.has(i)?"✓ ":""}${c.nom}</button>`).join("");
+  $("rounds").querySelectorAll(".rb").forEach(b=>b.onclick=()=>load(+b.dataset.i));
+}
+function load(i){
+  cur=i;sel=null;rounds();const R=ROUNDS[i];
+  TR=R.trains||SL.map(x=>({...x,nom:"Sector "+x.nom.toLowerCase(),msg:"del sector "+x.nom.toLowerCase()}));
+  $("task").innerHTML=R.trains?`Carrega ${R.t}`:`Carrega ${R.t} al tren del seu sector`;$("vfb").textContent="";$("vfb").className="fb";
+  cards=shuffle(R.make());
+  const need={};cards.forEach(c=>need[c.r]=(need[c.r]||0)+1);
+  $("station").innerHTML=TR.map(s=>`<div class="plat" data-r="${s.id}" style="--c:${s.c}" role="button" tabindex="0">
+    <div class="loco"><div class="cab"></div><div class="body"></div><div class="ic">${s.ic}</div></div>
+    <div class="name">${s.nom}</div>
+    <div class="wagons">${Array.from({length:need[s.id]||0},()=>'<span class="wagon">?</span>').join("")}</div></div>`).join("");
+  $("dock").innerHTML=cards.map((c,j)=>`<button class="crate" data-j="${j}">${c.v}</button>`).join("");
+  $("station").querySelectorAll(".plat").forEach(p=>{p.onclick=()=>{if(sel!==null)drop(sel,p.dataset.r)};
+    p.onkeydown=e=>{if((e.key==="Enter"||e.key===" ")&&sel!==null){e.preventDefault();drop(sel,p.dataset.r)}}});
+  $("dock").querySelectorAll(".crate").forEach(bindCrate);
+}
+function select(j){sel=j;document.querySelectorAll(".crate").forEach(c=>c.classList.toggle("sel",+c.dataset.j===j));document.querySelectorAll(".plat").forEach(p=>p.classList.add("pick"))}
+function unselect(){sel=null;document.querySelectorAll(".crate").forEach(c=>c.classList.remove("sel"));document.querySelectorAll(".plat").forEach(p=>p.classList.remove("pick","hover"))}
+function drop(j,rid){
+  const it=cards[j],btn=document.querySelector(`.crate[data-j="${j}"]`),fb=$("vfb");if(!btn)return;
+  if(it.r===rid){
+    const w=document.querySelector(`.plat[data-r="${rid}"] .wagon:not(.full)`);w.classList.add("full");w.textContent=it.v;
+    btn.remove();tone(true);fb.className="fb ok";fb.textContent=["Molt bé!","Carregat!","Correcte!","Perfecte!"][Math.random()*4|0];unselect();
+    if(!document.querySelector(".crate"))finish();
+  }else{
+    tone(false);btn.classList.remove("shake");void btn.offsetWidth;btn.classList.add("shake");
+    fb.className="fb bad";fb.textContent=`Aquest no és el tren. Pensa-hi: ${it.v} no és ${TR.find(t=>t.id===rid).msg}.`;unselect();
+  }
+}
+function finish(){
+  done.add(cur);rounds();whistle();$("vfb").className="fb ok";$("vfb").textContent="Tots els trens plens! Xiu-xiu, marxem!";
+  document.querySelectorAll(".plat").forEach((p,i)=>setTimeout(()=>p.classList.add("go"),i*200));
+  const next=ROUNDS.findIndex((c,i)=>!done.has(i));
+  setTimeout(()=>{
+    $("dock").innerHTML=next>=0?`<button class="big" id="nx">Següent: ${ROUNDS[next].nom.toLowerCase()} →</button>`
+      :`<div style="text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center"><div style="font-size:1.8rem;font-weight:700">Ets el cap d'estació!</div><button class="big" id="nx">Tornar a començar</button></div>`;
+    $("nx").onclick=()=>{if(next<0){done.clear();load(0)}else load(next)};
+  },1400);
+}
+function bindCrate(b){
+  const j=+b.dataset.j;
+  b.addEventListener("pointerdown",e=>{
+    if(e.button>0)return;const sx=e.clientX,sy=e.clientY,rect=b.getBoundingClientRect();let clone=null,over=null;
+    b.setPointerCapture(e.pointerId);
+    const move=ev=>{const dx=ev.clientX-sx,dy=ev.clientY-sy;
+      if(!clone&&Math.hypot(dx,dy)>8){clone=b.cloneNode(true);clone.classList.add("drag");clone.style.width=rect.width+"px";document.body.appendChild(clone);b.classList.add("ghost")}
+      if(clone){clone.style.left=(rect.left+dx)+"px";clone.style.top=(rect.top+dy)+"px";
+        const el=document.elementFromPoint(ev.clientX,ev.clientY),p=el&&el.closest(".plat");
+        if(over&&over!==p)over.classList.remove("hover");over=p;if(p)p.classList.add("hover")}};
+    const up=()=>{b.removeEventListener("pointermove",move);b.removeEventListener("pointerup",up);b.removeEventListener("pointercancel",up);
+      if(clone){clone.remove();b.classList.remove("ghost");if(over){over.classList.remove("hover");drop(j,over.dataset.r)}}
+      else{sel===j?unselect():select(j)}};
+    b.addEventListener("pointermove",move);b.addEventListener("pointerup",up);b.addEventListener("pointercancel",up);
+  });
+  b.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();sel===j?unselect():select(j)}});
+}
+
+/* ---------- REVIEW ---------- */
+$("revcards").innerHTML=SL.map(s=>`<div class="rcard" style="--c:${s.c}"><h2>${s.ic} Sector ${s.nom.toLowerCase()}</h2><p>${s.def}</p>
+  <p><b>Activitats:</b></p><div class="chips">${s.act.map(a=>`<span class="chip">${a}</span>`).join("")}</div>
+  <p><b>Oficis:</b></p><div class="chips">${OFICIS[s.id].map(a=>`<span class="chip">${a}</span>`).join("")}</div></div>`).join("");
+function table(){
+  $("tbl").innerHTML='<thead><tr><th>Producte</th><th>Matèria primera</th></tr></thead><tbody>'+
+    ORIGEN.map(([p,m])=>`<tr><td>${cap(p)}</td><td class="hide" tabindex="0">${cap(m)}</td></tr>`).join("")+'</tbody>';
+  $("tbl").querySelectorAll("td.hide").forEach(td=>{const f=()=>td.classList.remove("hide");td.onclick=f;td.onkeydown=e=>{if(e.key==="Enter"||e.key===" ")f()}});
+}
+$("tapa").onclick=table;
+
+/* ---------- TABS ---------- */
+function tab(w){["joc","vag","rep"].forEach(id=>{$(id).hidden=id!==w;if(id===w)$(id).style.display="flex"});
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-pressed",t.dataset.t===w));if(w==="joc")moveTrain()}
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>tab(t.dataset.t));
+window.addEventListener("resize",moveTrain);
+table();start();load(0);
+</script>
+</body></html>

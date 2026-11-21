@@ -1,0 +1,224 @@
+<!doctype html><html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>El Tren dels Números · Mates</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap">
+<style>
+:root{--bg:#eef6f8;--panel:#fff;--fg:#1f2d33;--muted:#5d6f75;--line:#d2e0e4;--rail:#7a5a3c;--accent:#e4572e;--ok:#2e9e5b;--bad:#d64045;--blue:#2f6fd6;--grn:#1f9a6b;--yel:#d49a00;
+ --display:"Fredoka","Trebuchet MS",system-ui,sans-serif}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--display);font-size:18px;padding:12px 16px 30px}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1{font-size:1.45rem;margin:0}
+.pill{font-weight:600;background:var(--panel);border:2px solid var(--line);border-radius:999px;padding:4px 14px;align-self:center}
+.track{position:relative;height:84px;background:var(--panel);border:2px solid var(--line);border-radius:16px;overflow:hidden}
+.rails{position:absolute;left:10px;right:10px;bottom:16px;height:10px;background:repeating-linear-gradient(90deg,var(--rail) 0 6px,transparent 6px 22px)}
+.rails::before,.rails::after{content:"";position:absolute;left:0;right:0;height:3px;background:var(--rail)}
+.rails::before{top:0}.rails::after{bottom:0}
+.station{position:absolute;right:10px;bottom:28px;font-size:.72rem;font-weight:700;color:var(--muted);text-align:center;line-height:1.1}
+.station b{display:block;font-size:1.6rem;line-height:1}
+.train{position:absolute;bottom:24px;left:6px;width:96px;transition:left .7s cubic-bezier(.4,1.6,.5,1)}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:20px;padding:18px;text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center}
+.cat{font-size:.8rem;font-weight:600;letter-spacing:.12em;color:var(--muted)}
+.q{font-size:1.15rem;font-weight:600;margin:0;text-wrap:balance;line-height:1.35}
+.opt{display:flex;flex-direction:column;gap:8px;align-items:center}
+.mode{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.mode button{font:inherit;font-weight:600;border:2px solid var(--line);background:var(--panel);border-radius:12px;padding:8px 13px;cursor:pointer;color:var(--fg)}
+.mode button[aria-pressed="true"]{border-color:var(--blue);background:#e5effd;color:var(--blue)}
+.big{font:inherit;font-size:1.15rem;font-weight:700;background:var(--accent);color:#fff;border:0;border-radius:16px;padding:13px 22px;cursor:pointer}
+/* vertical operation */
+.op{font-family:"Courier New",ui-monospace,monospace;font-weight:700;font-size:2.6rem;line-height:1.15;display:inline-grid;grid-template-columns:1ch auto;column-gap:.4ch;text-align:right}
+.op .sign{grid-row:2;color:var(--accent)}
+.op .n{letter-spacing:.35ch}
+.op .line{grid-column:1/-1;border-top:4px solid var(--fg);margin:2px 0}
+.op .res{grid-column:2;letter-spacing:.35ch;color:var(--blue);min-height:1.15em}
+.op .res .cur{display:inline-block;width:.9ch;border-bottom:4px solid var(--accent);animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.2}}
+.keys{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%;max-width:380px;margin-top:4px}
+.keys button{font:inherit;font-size:1.6rem;font-weight:700;border:0;border-radius:14px;padding:10px 0;background:var(--blue);color:#fff;cursor:pointer;box-shadow:0 4px 0 #1d4e9e}
+.keys button:active{transform:translateY(3px);box-shadow:0 1px 0 #1d4e9e}
+.keys .del{background:var(--muted);box-shadow:0 4px 0 #3f4f55}
+.keys .ok{background:var(--ok);box-shadow:0 4px 0 #1d6b3d;grid-column:span 4;font-size:1.3rem}
+.fb{min-height:1.6em;font-weight:600}.fb.ok{color:var(--ok)}.fb.bad{color:var(--bad)}.fb.info{color:var(--blue)}
+.tip{background:#fff6dc;border-radius:12px;padding:8px 12px;font-size:.95rem;color:#6b5a14}
+.stars{font-size:2.4rem;letter-spacing:4px;color:var(--yel)}
+.word{font-size:2rem;font-weight:700}
+.shake{animation:shake .4s}@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.grid{--cw:clamp(44px,13vw,58px);display:grid;gap:4px 6px;font-family:"Courier New",ui-monospace,monospace;font-weight:700;font-size:2.4rem;justify-content:center;align-items:center}
+.grid .gc{text-align:center;line-height:1.1}
+.grid .sg{color:var(--accent)}
+.grid .gl{border-top:4px solid var(--fg);margin:2px 0}
+.grid .carry{font:inherit;font-size:1.1rem;height:30px;border:2px dashed var(--line);border-radius:8px;background:transparent;color:var(--accent);cursor:pointer;padding:0}
+.grid .carry.on{border-style:solid;border-color:var(--accent);background:#fff1e9}
+.grid .rc{font:inherit;font-size:2.3rem;height:58px;border:3px solid var(--line);border-radius:12px;background:#f5f9ff;color:var(--blue);cursor:pointer;padding:0}
+.grid .rc.cur{border-color:var(--accent);background:#fff6ef;box-shadow:0 0 0 3px #ffd9c7}
+.hand{margin:0;font-size:.85rem;color:var(--muted)}
+.kbin{font:inherit;font-size:1rem;text-align:center;width:100%;max-width:380px;padding:10px;border:2px dashed var(--line);border-radius:12px;background:#fbfdff;color:var(--muted);caret-color:transparent}
+.kbin:focus{outline:none;border-style:solid;border-color:var(--blue);color:var(--blue)}
+.kbin:focus::placeholder{color:var(--blue)}
+[hidden]{display:none!important}
+@media (max-width:420px){.op{font-size:2.2rem}.keys button{font-size:1.35rem}}
+</style>
+</head><body>
+<div class="wrap">
+  <h1>🚂 El Tren dels Números</h1>
+  <div class="track"><div class="rails"></div><div class="station"><b>⚑</b>ESTACIÓ</div>
+    <svg class="train" id="train" viewBox="0 0 96 44"><rect x="4" y="12" width="40" height="22" rx="4" fill="var(--accent)"/><rect x="30" y="2" width="14" height="14" rx="2" fill="var(--accent)"/><rect x="33" y="5" width="8" height="7" rx="1" fill="#fff"/><rect x="10" y="4" width="8" height="10" rx="1" fill="var(--fg)"/><rect x="50" y="16" width="40" height="18" rx="4" fill="var(--blue)"/><rect x="44" y="24" width="6" height="3" fill="var(--fg)"/><circle cx="14" cy="36" r="6" fill="var(--fg)"/><circle cx="34" cy="36" r="6" fill="var(--fg)"/><circle cx="60" cy="36" r="6" fill="var(--fg)"/><circle cx="80" cy="36" r="6" fill="var(--fg)"/></svg></div>
+  <div class="pill" id="score">Tria el joc</div>
+  <div id="stage"></div>
+</div>
+<script>
+const $=s=>document.getElementById(s);
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.random()*a.length|0];
+const fmt=n=>n>=1000?String(n).replace(/\B(?=(\d{3})+(?!\d))/g,"."):String(n);
+const PRAISE=["Molt bé!","Genial!","Correcte!","Xiu-xiu! El tren avança!","Fantàstic!"];
+let AC;function tone(ok){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+ (ok?[523,659,784]:[220,180]).forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+i*.1;
+ o.type=ok?"triangle":"square";o.frequency.value=f;g.gain.setValueAtTime(.1,t);g.gain.exponentialRampToValueAtTime(.001,t+.18);
+ o.connect(g).connect(AC.destination);o.start(t);o.stop(t+.2)})}catch(e){}}
+function moveTrain(d,t){const tr=$("train"),p=tr.parentElement;tr.style.left=(6+Math.max(0,p.clientWidth-tr.clientWidth-80)*d/t)+"px"}
+
+/* ---- nombres en lletres (norma D-U-C) ---- */
+const UN=["zero","u","dos","tres","quatre","cinc","sis","set","vuit","nou","deu","onze","dotze","tretze","catorze","quinze","setze","disset","divuit","dinou"];
+const DE={2:"vint",3:"trenta",4:"quaranta",5:"cinquanta",6:"seixanta",7:"setanta",8:"vuitanta",9:"noranta"};
+function w2(n){if(n<20)return UN[n];const t=Math.floor(n/10),u=n%10;if(!u)return DE[t];return t===2?"vint-i-"+UN[u]:DE[t]+"-"+UN[u]}
+function w3(n){const c=Math.floor(n/100),r=n%100;if(!c)return w2(r);const h=c===1?"cent":UN[c]+"-cents";return r?h+" "+w2(r):h}
+function words(n){const m=Math.floor(n/1000),r=n%1000;if(!m)return w3(r);const h=m===1?"mil":UN[m]+" mil";return r?h+" "+w3(r):h}
+
+let kbUsed=false,tipus="suma",nivell=2,maMode=true,cols=[],cur=0,W=0;const N=10;let qs=[],n=0,stars=0,typed="",tries=0,lock=false;
+/* ---- generadors ---- */
+function suma(lv){let a,b;
+  if(lv===1){do{a=R(15,89);b=R(12,89)}while(a%10+b%10<10||a+b>99)}
+  else if(lv===2){do{a=R(120,689);b=R(110,399)}while(a%10+b%10<10||a+b>999)}
+  else{do{a=R(450,989);b=R(250,899)}while(a+b<1000||a%10+b%10<10)}
+  return {a,b,s:"+",r:a+b}}
+function resta(lv){let a,b;
+  if(lv===1){do{a=R(30,99);b=R(11,a-5)}while(a%10>=b%10)}
+  else if(lv===2){do{a=R(300,999);b=R(110,a-50)}while(a%10>=b%10)}
+  else{do{a=R(4,9)*100+R(0,1)*10+R(0,9);b=R(110,a-40)}while(a%10>=b%10||Math.floor(a/10)%10>=Math.floor(b/10)%10)}
+  return {a,b,s:"−",r:a-b}}
+const PS=[(a,b)=>`Un tren porta <b>${a}</b> passatgers. A l'estació en pugen <b>${b}</b> més. Quants passatgers hi ha ara?`,
+ (a,b)=>`Tenim dues guardioles. En una hi ha <b>${a}</b> euros i a l'altra <b>${b}</b> euros. Quants euros tenim entre les dues?`,
+ (a,b)=>`Ahir vaig fer <b>${a}</b> km en tren i avui n'he fet <b>${b}</b>. Quants km he fet entre els dos dies?`,
+ (a,b)=>`A la biblioteca hi havia <b>${a}</b> llibres i n'han comprat <b>${b}</b> més. Quants llibres hi ha ara?`];
+const PR=[(a,b)=>`Un tren porta <b>${a}</b> passatgers. A l'estació en baixen <b>${b}</b>. Quants passatgers queden?`,
+ (a,b)=>`Tenia <b>${a}</b> cromos i n'he regalat <b>${b}</b> al meu cosí. Quants cromos em queden?`,
+ (a,b)=>`En una granja hi havia <b>${a}</b> ous i n'han venut <b>${b}</b>. Quants ous queden?`,
+ (a,b)=>`El viatge en tren és de <b>${a}</b> km. Ja n'hem fet <b>${b}</b>. Quants km falten?`];
+function taula(){const t=pick([2,5,5,10]),x=R(1,10);return Math.random()<.5?{cat:"TAULES",big:`${t} × ${x} = ?`,r:t*x,h:"t"+t}:{cat:"TAULES",big:`${x} × ${t} = ?`,r:t*x,h:"t"+t}}
+function doble(){if(Math.random()<.5){const x=R(6,50);return {cat:"DOBLES",big:`El doble de ${x} és…`,r:2*x,h:"doble"}}
+  const x=R(5,50)*2;return {cat:"MEITATS",big:`La meitat de ${x} és…`,r:x/2,h:"meitat"}}
+function mental(){const k=R(1,4);
+  if(k===1){const a=R(1,8)*100,b=R(1,9)*10;return {cat:"CÀLCUL MENTAL",big:`${a} + ${b} = ?`,r:a+b}}
+  if(k===2){const a=R(3,9)*100,b=R(1,a/100-1)*100;return {cat:"CÀLCUL MENTAL",big:`${a} − ${b} = ?`,r:a-b}}
+  if(k===3){const a=R(2,9)*10+5,b=R(1,Math.floor(a/10)-1)*10+5;return {cat:"CÀLCUL MENTAL",big:`${a} − ${b} = ?`,r:a-b}}
+  const a=R(15,60),b=R(2,Math.min(30,a-1)),c=R(2,20);return Math.random()<.5?{cat:"OPERACIONS COMBINADES",big:`${a} − ${b} + ${c} = ?`,r:a-b+c,h:"comb"}:{cat:"OPERACIONS COMBINADES",big:`${a} + ${c} − ${b} = ?`,r:a+c-b,h:"comb"}}
+function nombre(){const k=R(1,7),n4=R(1000,9999);
+  if(k===1){const p=pick([["unitats de miler",1000],["centenes",100],["desenes",10],["unitats",1]]);
+    return {cat:"DESCOMPOSICIÓ",big:fmt(n4),sub:`Quantes <b>${p[0]}</b> té aquest nombre?`,r:Math.floor(n4/p[1])%10,h:"pos"}}
+  if(k===2){const d=String(n4).split("").map(Number);const parts=[d[0]*1000,d[1]*100,d[2]*10,d[3]].filter(x=>x);
+    return Math.random()<.5?{cat:"DESCOMPOSICIÓ",big:parts.join(" + ")+" = ?",r:n4,h:"pos"}:
+      {cat:"DESCOMPOSICIÓ",big:[`${d[0]} UM`,`${d[1]} C`,`${d[2]} D`,`${d[3]} U`].filter(x=>x[0]!=="0").join(" + ")+" = ?",r:n4,h:"pos"}}
+  if(k===3){const n=pick([R(1,9)*1000,R(10,99)*100,R(100,999)*10+9,R(100,999)*10]);const ant=Math.random()<.5;
+    return {cat:ant?"NOMBRE ANTERIOR":"NOMBRE POSTERIOR",big:fmt(n),sub:`Quin és el nombre immediatament <b>${ant?"anterior":"posterior"}</b>?`,r:ant?n-1:n+1,h:"ant"}}
+  if(k===4){const st=pick([2,3,5,10,100,-1,-2]),a=st===100?R(40,55)*100:st<0?R(50,99):R(1,90)*(st===3?1:10)+(st===2?R(0,9)*2:0);
+    const t=[0,1,2,3].map(i=>a+i*st);return {cat:"SÈRIES",big:t.map(fmt).join(" – ")+" – ?",sub:"Quin nombre ve després?",r:a+4*st,h:"serie"}}
+  if(k===5){if(Math.random()<.5){const x=R(1001,9899);return {cat:"ARRODONIR",big:fmt(x),sub:"Quin és el <b>miler</b> més pròxim?",r:Math.round(x/1000)*1000,h:"round"}}
+    const x=R(101,989);return {cat:"ARRODONIR",big:fmt(x),sub:"Quina és la <b>centena</b> més pròxima?",r:Math.round(x/100)*100,h:"round"}}
+  const x=Math.random()<.5?n4:R(100,999);return {cat:"ESCRIU AMB XIFRES",big:`<span style="font-size:.62em">${words(x)}</span>`,r:x,h:"xifres"}}
+function build(){const out=[];for(let i=0;i<N;i++){let q;
+  if(tipus==="suma")q=suma(nivell);else if(tipus==="resta")q=resta(nivell);
+  else if(tipus==="barreja")q=Math.random()<.5?suma(nivell):resta(nivell);
+  else if(tipus==="problemes"){const t=Math.random()<.5?"s":"r";q=t==="s"?suma(Math.min(nivell,2)):resta(Math.min(nivell,2));q.text=(t==="s"?pick(PS):pick(PR))(q.a,q.b)}
+  else if(tipus==="taules")q=Math.random()<.75?taula():doble();
+  else if(tipus==="mental")q=mental();
+  else q=nombre();
+  out.push(q)}return out}
+/* ---- pantalles ---- */
+function intro(){
+  $("score").textContent="Tria el joc";moveTrain(0,1);
+  const mb=(k,v,l)=>`<button data-k="${k}" data-v="${v}" aria-pressed="${(k==="t"?tipus:String(nivell))===String(v)}">${l}</button>`;
+  const needLv=["suma","resta","barreja","problemes"].includes(tipus);
+  $("stage").innerHTML=`<div class="card"><div class="cat">QUÈ VOLS PRACTICAR?</div>
+   <div class="mode">${mb("t","suma","➕ Sumes")}${mb("t","resta","➖ Restes")}${mb("t","barreja","🔀 Sumes i restes")}${mb("t","problemes","🚂 Problemes")}
+   ${mb("t","taules","✖️ Taules 2·5·10, dobles i meitats")}${mb("t","mental","🧠 Càlcul mental")}${mb("t","nombres","🔢 Nombres de 4 xifres")}</div>
+   ${needLv?`<div class="cat" style="margin-top:6px">NIVELL</div><div class="mode">${mb("n",1,"🟢 2 xifres")}${mb("n",2,"🟡 3 xifres portant-ne")}${mb("n",3,"🔴 Difícil")}</div>`:""}
+   ${["suma","resta","barreja"].includes(tipus)?`<div class="cat" style="margin-top:6px">COM VOLS ESCRIURE EL RESULTAT?</div><div class="mode"><button data-k="m" data-v="1" aria-pressed="${maMode}">✍️ Com a mà (de dreta a esquerra)</button><button data-k="m" data-v="0" aria-pressed="${!maMode}">➡️ Normal</button></div>`:""}
+   <button class="big" id="go">Arrencar! 🚂</button></div>`;
+  $("stage").querySelectorAll(".mode button").forEach(b=>b.onclick=()=>{if(b.dataset.k==="t")tipus=b.dataset.v;else if(b.dataset.k==="m")maMode=b.dataset.v==="1";else nivell=+b.dataset.v;intro()});
+  $("go").onclick=start;
+}
+function start(){qs=build();n=0;stars=0;moveTrain(0,N);show()}
+function opHTML(q){return `<div class="op"><span></span><span class="n">${q.a}</span><span class="sign">${q.s}</span><span class="n">${q.b}</span><span class="line"></span><span class="res" id="res"></span></div>`}
+const isMa=q=>maMode&&q.s&&!q.text;
+function gridHTML(q){W=Math.max(String(q.a).length,String(q.b).length,String(q.r).length);
+  const pad=n=>String(n).padStart(W," ").split("");
+  const cell=(c,cls="")=>`<span class="gc ${cls}">${c===" "?"":c}</span>`;
+  let h=`<div class="grid" style="grid-template-columns:repeat(${W+1},var(--cw))">`;
+  h+=`<span></span>`+Array.from({length:W},(_,i)=>`<button class="carry" data-c="${i}" aria-label="em porto">${""}</button>`).join("");
+  h+=`<span></span>`+pad(q.a).map(c=>cell(c)).join("");
+  h+=cell(q.s,"sg")+pad(q.b).map(c=>cell(c)).join("");
+  h+=`<span class="gl" style="grid-column:1/-1"></span><span></span>`+Array.from({length:W},(_,i)=>`<button class="rc" data-i="${i}"></button>`).join("");
+  return h+`</div><p class="hand">✍️ Comença per les <b>unitats</b> (a la dreta). Toca a sobre d'una columna per posar-hi el <b>1</b> que te'n portes.</p>`}
+function show(){
+  typed="";tries=0;lock=false;const q=qs[n];
+  $("score").textContent=`Pregunta ${n+1} de ${N} · ★ ${stars}`;
+  let body;
+  if(q.text)body=`<p class="q">${q.text}</p><div id="opbox" hidden>${opHTML(q)}</div><div class="word" id="ansbox" style="color:var(--blue);min-height:1.2em"></div>`;
+  else if(isMa(q))body=gridHTML(q);
+  else if(q.s)body=opHTML(q);
+  else body=`${q.sub?`<p class="q">${q.sub}</p>`:""}<div class="word">${q.big}</div><div class="word" id="ansbox" style="color:var(--blue);min-height:1.2em"></div>`;
+  $("stage").innerHTML=`<div class="card"><div class="cat">${q.cat||(q.text?"PROBLEMA":q.s==="+"?"SUMA":"RESTA")}</div>${body}
+   <input class="kbin" id="kb" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="⌨️ Toca aquí per escriure amb el teclat">
+   <div class="fb" id="fb"></div><div id="tip"></div>
+   <div class="keys">${[1,2,3,4,5,6,7,8,9,0].map(d=>`<button data-d="${d}">${d}</button>`).join("")}<button class="del" data-x="del">⌫</button><button class="ok" data-x="ok">✅ Comprovar</button></div></div>`;
+  $("stage").querySelectorAll(".keys button").forEach(b=>b.onclick=()=>key(b.dataset.d??b.dataset.x));
+  const kb=$("kb");
+  kb.addEventListener("input",()=>{kbUsed=true;const v=kb.value.replace(/\D/g,"");kb.value="";for(const d of v)key(d)});
+  kb.addEventListener("keydown",e=>{if(e.key==="Backspace"&&!kb.value){e.preventDefault();key("del")}else if(e.key==="Enter"){e.preventDefault();key("ok")}});
+  const focusKb=()=>{if(!lock)kb.focus()};
+  $("stage").querySelectorAll(".op,#ansbox").forEach(el=>el.addEventListener("click",focusKb));
+  if(kbUsed)setTimeout(focusKb,50);
+  if(isMa(q)){cols=new Array(W).fill("");cur=W-1;
+    $("stage").querySelectorAll(".rc").forEach(b=>b.onclick=()=>{if(lock)return;cur=+b.dataset.i;draw();if(kbUsed)kb.focus()});
+    $("stage").querySelectorAll(".carry").forEach(b=>b.onclick=()=>{if(lock)return;b.textContent=b.textContent?"":"1";b.classList.toggle("on")})}
+  draw();
+}
+function draw(){const q0=qs[n];if(q0&&isMa(q0)){$("stage").querySelectorAll(".rc").forEach((b,i)=>{b.textContent=cols[i];b.classList.toggle("cur",i===cur&&!lock)});return}const q=qs[n],el=(q.s&&!q.text)?$("res"):$("ansbox");if(!el)return;
+  el.innerHTML=(typed||"")+(lock?"":'<span class="cur"></span>')}
+function key(k){if(lock)return;
+  if(isMa(qs[n])){if(k==="ok")return check();
+    if(k==="del"){if(cols[cur]==="")cur=Math.min(W-1,cur+1);cols[cur]=""}
+    else{cols[cur]=k;if(cur>0)cur--}
+    typed=cols.join("");draw();return}
+  if(k==="del")typed=typed.slice(0,-1);else if(k==="ok")return check();else if(typed.length<5)typed+=k;draw()}
+document.addEventListener("keydown",e=>{if(e.target&&e.target.tagName==="INPUT")return;if(!qs.length||(!$("res")&&!$("ansbox")))return;if(/^\d$/.test(e.key))key(e.key);else if(e.key==="Backspace")key("del");else if(e.key==="Enter")key("ok");else if(isMa(qs[n])&&!lock&&(e.key==="ArrowLeft"||e.key==="ArrowRight")){cur=Math.max(0,Math.min(W-1,cur+(e.key==="ArrowLeft"?-1:1)));draw()}});
+const HINTS={t2:"La taula del 2 és fer el <b>doble</b>: compta de 2 en 2.",t5:"La taula del 5 sempre acaba en <b>0 o 5</b>. Compta de 5 en 5: 5, 10, 15, 20…",t10:"Per multiplicar per 10, afegeix un <b>0</b> al final.",
+ doble:"El doble és sumar el nombre <b>dues vegades</b>: 14 + 14.",meitat:"La meitat és repartir en <b>2 parts iguals</b>: 18 → 9 i 9.",comb:"Fes les operacions <b>d'esquerra a dreta</b>, una a una.",
+ pos:"Recorda: <b>UM</b> (milers) – <b>C</b> (centenes) – <b>D</b> (desenes) – <b>U</b> (unitats).",ant:"Anterior és <b>−1</b>, posterior és <b>+1</b>. Compte quan acaba en 0 o en 9!",
+ serie:"Mira quant <b>augmenta o disminueix</b> d'un nombre a l'altre.",round:"Mira la xifra de la dreta: si és <b>5 o més</b>, puja; si és menys, baixa.",xifres:"Llegeix a poc a poc: primer els <b>milers</b>, després les <b>centenes</b>…"};
+function hint(q){if(q.h)return HINTS[q.h];
+  if(q.s==="+")return "Comença per les <b>unitats</b>. Si passen de 9, te'n portes <b>1</b> a la columna del costat.";
+  return "Si a dalt hi ha <b>menys</b> que a baix, afegeix-hi <b>10</b> i te'n portes <b>1</b> a la columna següent de baix."}
+function check(){
+  const q=qs[n],fb=$("fb");
+  if(isMa(q)){const f=cols.findIndex(c=>c!=="");const part=f<0?[]:cols.slice(f);
+    if(part.includes("")){fb.className="fb info";fb.textContent="Et falta alguna columna per omplir 👀";return}
+    typed=part.join("")}
+  if(!typed){fb.className="fb info";fb.textContent="Escriu el resultat amb els números 👇";return}
+  const showOp=()=>{if(q.text){$("opbox").hidden=false;$("res").textContent=q.r}};
+  if(+typed===q.r){lock=true;stars++;tone(true);draw();fb.className="fb ok";fb.textContent=pick(PRAISE);moveTrain(stars,N);showOp();return next(q.text?2200:1200)}
+  tries++;tone(false);const box=isMa(q)?$("stage").querySelector(".grid"):(q.s&&!q.text)?$("res"):$("ansbox");box.classList.remove("shake");void box.offsetWidth;box.classList.add("shake");
+  if(tries<2){fb.className="fb bad";fb.textContent="Uy! Torna-ho a provar 💪";$("tip").innerHTML=`<div class="tip">💡 ${hint(q)}</div>`;if(q.text)$("opbox").hidden=false;typed="";if(isMa(q)){cols=new Array(W).fill("");cur=W-1}draw();return}
+  lock=true;typed=String(q.r);if(isMa(q)){const r=String(q.r).padStart(W," ");cols=r.split("").map(c=>c===" "?"":c)}draw();showOp();
+  fb.className="fb info";fb.textContent=`La resposta és ${fmt(q.r)}. Mira-ho bé 👀`;next(3000);
+}
+function next(ms){setTimeout(()=>{n++;if(n<N)show();else end()},ms)}
+function end(){const st=Math.round(stars/N*5);$("score").textContent=`Final · ★ ${stars} de ${N}`;
+  $("stage").innerHTML=`<div class="card"><div class="cat">HAS ARRIBAT A L'ESTACIÓ!</div><div class="stars">${"★".repeat(st)}${"☆".repeat(5-st)}</div>
+   <div class="word">${stars} de ${N}</div><p class="q">${stars>=9?"Ets el maquinista campió!":stars>=6?"Molt bon viatge!":"Tornem a pujar al tren?"}</p>
+   <div class="mode"><button id="again" style="border-color:var(--accent);color:var(--accent)">🔁 Tornar a jugar</button><button id="menu">⚙️ Canviar de joc</button></div></div>`;
+  $("again").onclick=start;$("menu").onclick=intro}
+window.addEventListener("resize",()=>moveTrain(stars,N));
+intro();
+</script>
+</body></html>

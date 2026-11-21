@@ -1,0 +1,447 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>El Tren de las Palabras · Castellano</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap">
+<style>
+:root{--bg:#f4f1fb;--panel:#fff;--fg:#26233a;--muted:#686480;--line:#dcd7ea;--rail:#7a5a3c;--accent:#e4572e;--ok:#2e9e5b;--bad:#d64045;--blue:#2f6fd6;--pur:#7b4fc4;--yel:#d49a00;
+ --display:"Fredoka","Trebuchet MS",system-ui,sans-serif}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--display);font-size:18px;padding:12px 16px 30px}
+.wrap{max-width:700px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+h1{font-size:1.45rem;margin:0}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{font:inherit;font-size:.9rem;font-weight:600;border:2px solid var(--line);background:var(--panel);color:var(--fg);border-radius:12px;padding:6px 11px;cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+section{flex-direction:column;gap:14px}
+.pill{font-weight:600;background:var(--panel);border:2px solid var(--line);border-radius:999px;padding:4px 14px;align-self:center}
+.track{position:relative;height:84px;background:var(--panel);border:2px solid var(--line);border-radius:16px;overflow:hidden}
+.rails{position:absolute;left:10px;right:10px;bottom:16px;height:10px;background:repeating-linear-gradient(90deg,var(--rail) 0 6px,transparent 6px 22px)}
+.rails::before,.rails::after{content:"";position:absolute;left:0;right:0;height:3px;background:var(--rail)}
+.rails::before{top:0}.rails::after{bottom:0}
+.station{position:absolute;right:10px;bottom:28px;font-size:.72rem;font-weight:700;color:var(--muted);text-align:center;line-height:1.1}
+.station b{display:block;font-size:1.6rem;line-height:1}
+.train{position:absolute;bottom:24px;left:6px;width:96px;transition:left .7s cubic-bezier(.4,1.6,.5,1)}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:20px;padding:18px;text-align:center;display:flex;flex-direction:column;gap:8px}
+.cat{font-size:.8rem;font-weight:600;letter-spacing:.12em;color:var(--muted)}
+.q{font-size:1.2rem;font-weight:600;margin:0;text-wrap:balance}
+.word{font-size:2rem;font-weight:700;margin:2px 0;line-height:1.15;letter-spacing:.02em}
+.word .gap{display:inline-block;min-width:.9em;border-bottom:4px dashed var(--accent);color:var(--accent)}
+.fb{min-height:1.6em;font-weight:600}.fb.ok{color:var(--ok)}.fb.bad{color:var(--bad)}.fb.info{color:var(--blue)}
+.answers{display:grid;grid-template-columns:1fr;gap:10px}
+.answers.two{grid-template-columns:1fr 1fr}
+.ans{font:inherit;font-size:1.1rem;font-weight:600;border:3px solid var(--c,var(--line));background:var(--panel);color:var(--fg);border-radius:16px;padding:12px;cursor:pointer;min-height:56px}
+.answers.two .ans{font-size:1.5rem}
+.ans.right{background:var(--ok);border-color:var(--ok);color:#fff}
+.ans.wrong{background:var(--bad);border-color:var(--bad);color:#fff;animation:shake .4s}
+.ans:disabled{cursor:default}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.big{font:inherit;font-size:1.15rem;font-weight:700;background:var(--accent);color:#fff;border:0;border-radius:16px;padding:13px 22px;cursor:pointer;align-self:center}
+.btn{font:inherit;font-size:1rem;font-weight:600;border:0;border-radius:14px;padding:10px 16px;cursor:pointer;color:#fff;background:var(--blue)}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.stars{font-size:2.4rem;letter-spacing:4px;color:var(--yel)}
+.mode{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.mode button{font:inherit;font-weight:600;border:2px solid var(--line);background:var(--panel);border-radius:12px;padding:8px 14px;cursor:pointer;color:var(--fg)}
+.mode button[aria-pressed="true"]{border-color:var(--pur);background:#efe8fb;color:var(--pur)}
+input.dict{font:inherit;font-size:1.6rem;font-weight:600;text-align:center;padding:12px;border:3px solid var(--line);border-radius:14px;width:100%;color:var(--fg)}
+input.dict:focus{outline:none;border-color:var(--pur)}
+.sol{font-size:1.4rem;font-weight:700;color:var(--blue)}
+.sol mark{background:#ffe3a3;border-radius:4px;padding:0 2px}
+.rule{background:#fff6dc;border-radius:12px;padding:8px 12px;font-size:.95rem;color:#6b5a14}
+/* anagram */
+.slots{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;min-height:58px}
+.slot{width:44px;height:54px;border-radius:10px;background:#f1ecfb;border-bottom:4px solid var(--pur);font-size:1.7rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+.slots.ok .slot{background:#dff5e7;border-color:var(--ok)}
+.slots.bad{animation:shake .4s}
+.tiles{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.tile{font:inherit;width:48px;height:54px;font-size:1.6rem;font-weight:700;border:3px solid var(--fg);background:var(--panel);border-radius:12px;cursor:pointer;box-shadow:0 3px 0 var(--fg);color:var(--fg)}
+.tile:disabled{opacity:.2;cursor:default}
+.wagonbar{display:flex;gap:4px;align-items:flex-end;justify-content:center;flex-wrap:wrap;border-bottom:6px solid var(--rail);padding-bottom:4px;min-height:52px}
+.wagonbar .loco{font-size:2.2rem;transform:scaleX(-1);line-height:1}
+.wagonbar .w{width:40px;height:34px;border:2px dashed var(--line);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.wagonbar .w.full{border:2px solid var(--yel);background:#ffe9a8}
+textarea.dict{font:inherit;font-size:1.25rem;line-height:1.4;padding:12px;border:3px solid var(--line);border-radius:14px;width:100%;color:var(--fg);resize:vertical}
+textarea.dict:focus{outline:none;border-color:var(--pur)}
+.dlist{display:grid;gap:8px;text-align:left}
+.dcard{font:inherit;font-size:1.05rem;font-weight:600;text-align:left;border:2px solid var(--line);background:var(--panel);border-radius:14px;padding:10px 14px;cursor:pointer;color:var(--fg);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.dcard small{color:var(--muted);font-weight:500;font-size:.8rem;white-space:nowrap}
+.dcard:hover{border-color:var(--pur)}
+.corr{font-size:1.15rem;line-height:2.1;margin:6px 0;text-align:left}
+.corr .okw{color:var(--fg)}
+.corr .err{display:inline-flex;flex-direction:column-reverse;vertical-align:bottom;line-height:1.15;margin:0 2px}
+.corr .err s{color:var(--bad);font-size:.85em}
+.corr .err ins{color:var(--ok);font-weight:700;text-decoration:none;background:#e3f7ea;border-radius:4px;padding:0 3px}
+.player{display:flex;gap:10px;align-items:flex-start;justify-content:center;align-items:center}
+.pbtn{font-size:1.6rem;width:56px;height:56px;border-radius:50%;border:0;background:var(--line);cursor:pointer}
+.pbtn.big2{width:76px;height:76px;font-size:2.2rem;background:var(--pur);box-shadow:0 4px 0 #563497}
+.pinfo{font-size:.95rem;color:var(--muted);min-height:1.4em}
+.pcol{display:flex;flex-direction:column;align-items:center;gap:4px}
+.pcol span{font-size:.72rem;color:var(--muted);line-height:1.1;text-align:center;min-height:2.2em}
+.pdots{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.pd{font:inherit;font-size:.85rem;font-weight:700;width:34px;height:34px;border-radius:50%;border:2px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer}
+.pd.done{background:#efe8fb;border-color:#cdb8f0;color:var(--pur)}
+.pd.now{background:var(--pur);border-color:var(--pur);color:#fff}
+.star2{border-color:var(--yel);background:#fffaf0}
+.expl{text-align:left}.expl ol{margin:6px 0 0;padding-left:1.3em;line-height:1.45}.expl li{margin:6px 0;font-size:1rem}.expl b{color:var(--pur)}
+[hidden]{display:none!important}
+@media (max-width:480px){.slot{width:34px;height:46px;font-size:1.35rem}.tile{width:40px;height:48px;font-size:1.35rem}.word{font-size:1.7rem}}
+</style>
+</head><body>
+<div class="wrap">
+  <header>
+    <h1>🚂 El Tren de las Palabras</h1>
+    <div class="tabs">
+      <button class="tab" data-t="dic" aria-pressed="true">✏️ Dictado</button>
+      <button class="tab" data-t="pre" aria-pressed="false">❓ Preguntas</button>
+      <button class="tab" data-t="ord" aria-pressed="false">🔤 Ordena</button>
+    </div>
+  </header>
+
+  <!-- DICTADO -->
+  <section id="dic" style="display:flex">
+    <div class="track"><div class="rails"></div><div class="station"><b>⚑</b>ESTACIÓN</div><svg class="train" id="trainD" viewBox="0 0 96 44"></svg></div>
+    <div class="pill" id="scoreD">Dictado</div>
+    <div id="stageD"></div>
+  </section>
+
+  <!-- PREGUNTAS -->
+  <section id="pre" hidden>
+    <div class="track"><div class="rails"></div><div class="station"><b>⚑</b>ESTACIÓN</div><svg class="train" id="trainP" viewBox="0 0 96 44"></svg></div>
+    <div class="pill" id="scoreP">Pregunta 1 de 12</div>
+    <div id="stageP"></div>
+  </section>
+
+  <!-- ORDENA -->
+  <section id="ord" hidden>
+    <div class="wagonbar" id="wbar"></div>
+    <div class="pill" id="scoreO">Palabra 1 de 10</div>
+    <div id="stageO"></div>
+  </section>
+</div>
+
+<script>
+const $=s=>document.getElementById(s);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const pick=a=>a[Math.random()*a.length|0];
+const noAcc=s=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+const PRAISE=["¡Muy bien!","¡Genial!","¡Correcto!","¡Chu-chu! ¡El tren avanza!","¡Fantástico!"];
+const TRAIN_SVG=`<rect x="4" y="12" width="40" height="22" rx="4" fill="var(--accent)"/><rect x="30" y="2" width="14" height="14" rx="2" fill="var(--accent)"/><rect x="33" y="5" width="8" height="7" rx="1" fill="#fff"/><rect x="10" y="4" width="8" height="10" rx="1" fill="var(--fg)"/><rect x="50" y="16" width="40" height="18" rx="4" fill="var(--pur)"/><rect x="44" y="24" width="6" height="3" fill="var(--fg)"/><circle cx="14" cy="36" r="6" fill="var(--fg)"/><circle cx="34" cy="36" r="6" fill="var(--fg)"/><circle cx="60" cy="36" r="6" fill="var(--fg)"/><circle cx="80" cy="36" r="6" fill="var(--fg)"/>`;
+$("trainD").innerHTML=TRAIN_SVG;$("trainP").innerHTML=TRAIN_SVG;
+function moveTrain(id,done,total){const t=$(id),tr=t.parentElement;const max=tr.clientWidth-t.clientWidth-80;t.style.left=(6+Math.max(0,max)*done/total)+"px"}
+let AC;function tone(ok){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+ (ok?[523,659,784]:[220,180]).forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+i*.1;
+ o.type=ok?"triangle":"square";o.frequency.value=f;g.gain.setValueAtTime(.1,t);g.gain.exponentialRampToValueAtTime(.001,t+.18);
+ o.connect(g).connect(AC.destination);o.start(t);o.stop(t+.2)})}catch(e){}}
+let voice=null;function pickVoice(){try{const vs=speechSynthesis.getVoices();voice=vs.find(v=>/es-ES/i.test(v.lang))||vs.find(v=>/^es/i.test(v.lang))||null}catch(e){}}
+try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice}catch(e){}
+function say(t,rate=.85){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang=voice?voice.lang:"es-ES";if(voice)u.voice=voice;u.rate=rate;speechSynthesis.speak(u)}catch(e){}}
+function endCard(stars,total,again){const st=Math.round(stars/total*5);
+  return `<div class="card"><div class="cat">¡HAS LLEGADO A LA ESTACIÓN!</div><div class="stars">${"★".repeat(st)}${"☆".repeat(5-st)}</div>
+  <div class="word">${stars} de ${total}</div><p class="q">${stars>=total-1?"¡Eres el maquinista campeón!":stars>=total*.6?"¡Muy buen viaje!":"¿Volvemos a subir al tren?"}</p>
+  <button class="big" onclick="${again}">Jugar otra vez</button></div>`}
+
+/* ================= DICTADO (textos) ================= */
+const TEXTOS=[
+ {t:"Dictado 1 · Paula",n:1,x:"Paula es una niña que tiene siete años. Vive con su familia en Cirera, un barrio de Mataró. Ella acude todas las mañanas al colegio."},
+ {t:"Dictado 2 · El cumpleaños de Cecilia",n:2,x:"Cecilia celebra cada año su cumpleaños de una forma especial. Este año quiere hacer una fiesta de disfraces con todos sus amigos del colegio. La celebración se hará en un parque infantil que hay en la zona del centro. Cuando acabe la fiesta, irá a cenar a su restaurante favorito."},
+ {t:"El campamento",n:2,x:"Mi compañero Pablo y yo vamos a un campamento en el campo. Siempre llevamos la mochila, una cantimplora y un sombrero. Por la noche cantamos canciones y miramos las estrellas. ¡Tengo muchas ganas de empezar!"},
+ {t:"La merienda",n:2,x:"Hoy merendamos un bocadillo de pavo y un zumo de manzana. Mi hermana prefiere las aceitunas verdes y un trozo de bizcocho. Después jugamos con la pelota en el parque."},
+ {t:"El erizo",n:1,x:"En el bosque vive un erizo pequeño con muchas púas. Por la mañana busca cerezas y bellotas. Cuando hace frío, se esconde debajo de las hojas."},
+ {t:"La calabaza de Juan",n:2,x:"Para Halloween, Juan decoró una calabaza enorme. Sus amigos llevaban disfraces de brujas y fantasmas. Todos comieron caramelos y bailaron hasta muy tarde."},
+ {t:"El tren de la costa",n:2,x:"Los sábados, Marcos coge el tren con su abuelo. Desde la ventana ven el mar, los barcos y la playa. Cuando llegan a la estación de Barcelona, el maquinista toca la bocina."},
+ {t:"La rana saltarina",n:3,x:"Después de las lluvias, se forman charcas cerca del río. Allí vive contenta una familia de ranas. La más pequeña es muy graciosa porque no se cansa de saltar de una piedra a otra."},
+ {t:"El concierto",n:3,x:"Mañana empieza el concierto de la banda del colegio. Mi tía Carmen tocará el tambor y la trompeta. Todos los compañeros cantaremos una canción muy bonita. ¡Siempre es un día especial!"}
+];
+const STEP_SVG="";
+let dText=null,dList=[],dI=0,dStars=0,dAns=[],dMode="completo";
+function voz(t,final){let v=t.replace(/,/g,", coma,").replace(/¡/g,"abre exclamación: ").replace(/¿/g,"abre interrogación: ");
+  if(/!$/.test(v))v=v.replace(/!$/,final?"! cierra exclamación, punto final.":"! cierra exclamación.");
+  else if(/\?$/.test(v))v=v.replace(/\?$/,final?"? cierra interrogación, punto final.":"? cierra interrogación.");
+  else if(/\.$/.test(v))v=v.replace(/\.$/,final?". Punto final.":". Punto y seguido.");
+  return v}
+const splitS=t=>t.match(/[^.!?]+[.!?]+/g).map(x=>x.trim());
+function chunks(s){const w=s.split(" ");const out=[];let cur=[];w.forEach((x,i)=>{cur.push(x);if(cur.length>=4&&!/^(el|la|los|las|un|una|de|del|a|al|y|en|con|que|se|su|sus|mi|por)$/i.test(x)||/[,.!?]$/.test(x)){out.push(cur.join(" "));cur=[]}});if(cur.length)out.push(cur.join(" "));for(let k=out.length-1;k>0;k--){if(out[k].split(" ").length<2){out[k-1]+=" "+out[k];out.splice(k,1)}}return out}
+function sayChunks(s,fin){try{speechSynthesis.cancel();const cs=chunks(s);cs.forEach((c,k)=>{const u=new SpeechSynthesisUtterance(voz(c,fin&&k===cs.length-1));u.lang=voice?voice.lang:"es-ES";if(voice)u.voice=voice;u.rate=.6;speechSynthesis.speak(u);const p=new SpeechSynthesisUtterance(" ");p.volume=0;p.rate=.1;speechSynthesis.speak(p)})}catch(e){}}
+function dIntro(){
+  $("scoreD").textContent="Dictado";moveTrain("trainD",0,1);
+  const lvl=n=>"🟢🟡🔴"[0]&&["","🟢","🟡","🔴"][n];
+  $("stageD").innerHTML=`<div class="card star2"><div class="cat">⭐ PARA EL CONTROL</div>
+   <div style="font-size:1.25rem;font-weight:700">Dictado 2 · El cumpleaños de Cecilia</div>
+   <button class="big" id="go2">🚂 Practicar el Dictado 2</button>
+   <button class="btn" id="hard2" style="background:var(--pur)">🎯 Palabras difíciles del Dictado 2</button>
+   <p style="margin:0;font-size:.85rem;color:var(--muted)">Primero las palabras difíciles, después el dictado entero.</p></div>
+   <div class="card"><div class="cat">ELIGE UN DICTADO</div>
+   <p class="q" style="font-size:1rem;font-weight:500">Elige cómo quieres el dictado. Escribe con cuidado: mayúsculas, puntos y tildes. Al final, ¡la corrección!</p>
+   <div class="mode"><button data-c="completo" aria-pressed="${dMode==="completo"}">📖 Texto seguido (tú lo pausas)</button><button data-c="final" aria-pressed="${dMode==="final"}">✏️ Frase a frase</button><button data-c="frase" aria-pressed="${dMode==="frase"}">✅ Frase a frase y corregir cada una</button></div>
+   <div class="dlist">${TEXTOS.map((x,i)=>`<button class="dcard" data-i="${i}">${lvl(x.n)} ${x.t}<small>${splitS(x.x).length} frases</small></button>`).join("")}
+   <button class="dcard" data-i="r">🎲 ¡Sorpresa!<small>un dictado al azar</small></button></div>
+   <div class="rule">Recuerda: <b>m</b> antes de <b>p</b> y <b>b</b> · <b>za zo zu · ce ci</b> · <b>mayúscula</b> al empezar y después de punto, y en los nombres propios.</div></div>`;
+  $("go2").onclick=()=>dStart(1);$("hard2").onclick=dHard;
+  $("stageD").querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{dMode=b.dataset.c;dIntro()});
+  $("stageD").querySelectorAll(".dcard").forEach(b=>b.onclick=()=>dStart(b.dataset.i==="r"?Math.random()*TEXTOS.length|0:+b.dataset.i));
+}
+const HARD2=["Cecilia","celebra","cada año","cumpleaños","una forma especial","este año","fiesta de disfraces","todos sus amigos","del colegio","la celebración","se hará","un parque infantil","que hay en la zona","del centro","cuando acabe","irá a cenar","su restaurante favorito"];
+let dSaved=null;
+function dHard(){dSaved=dMode;dMode="frase";dText={t:"Palabras difíciles · Dictado 2",x:""};dList=shuffle(HARD2).slice(0,10);dI=0;dStars=0;dAns=[];moveTrain("trainD",0,dList.length);dShow()}
+function dStart(i){if(dSaved){dMode=dSaved;dSaved=null}if(dMode==="completo")return dFull(i);if(dMode==="completo")return dFull(i);dText=TEXTOS[i];dList=splitS(dText.x);dI=0;dStars=0;dAns=[];moveTrain("trainD",0,dList.length);dShow()}
+function dShow(){
+  const N=dList.length;
+  $("scoreD").textContent=`${dText.t} · ${dText.x?"Frase":"Palabra"} ${dI+1} de ${N}`;
+  $("stageD").innerHTML=`<div class="card"><div class="cat">ESCUCHA Y ESCRIBE · ${dText.x?"FRASE":"PALABRA"} ${dI+1} DE ${N}</div>
+   <div class="row"><button class="btn" id="dL">🔊 Frase</button><button class="btn" id="dC" style="background:var(--pur)">🧩 A trozos</button><button class="btn" id="dS" style="background:var(--muted)">🐢 Despacio</button></div>
+   <textarea class="dict" id="dIn" rows="3" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Escribe aquí la frase…">${dAns[dI]||""}</textarea>
+   <div id="dFix"></div>
+   <div class="row">${dI>0?'<button class="btn" id="dB" style="background:var(--line);color:var(--fg)">⬅ Anterior</button>':""}<button class="big" id="dN">${dI<N-1?"Siguiente frase ➜":"✅ Terminar y corregir"}</button></div></div>
+   ${dI>0?`<div class="card" style="text-align:left"><div class="cat">LO QUE LLEVAS ESCRITO</div><p style="margin:0;line-height:1.5">${dAns.slice(0,dI).map(esc).join(" ")}</p></div>`:""}`;
+  const fin=dI===dList.length-1;$("dL").onclick=()=>say(voz(dList[dI],fin),.8);$("dS").onclick=()=>say(voz(dList[dI],fin),.5);$("dC").onclick=()=>sayChunks(dList[dI],fin);
+  if($("dB"))$("dB").onclick=()=>{dAns[dI]=$("dIn").value;dI--;dShow()};
+  $("dN").onclick=dNext;
+  setTimeout(()=>{if(!$("dIn"))return;sayChunks(dList[dI],dI===dList.length-1);$("dIn").focus()},350);
+}
+/* --- modo texto seguido --- */
+let pChunks=[],pIdx=0,playing=false,pTimer=null,pFall=null,pGap=1,pGen=0;
+function dFull(i){dText=TEXTOS[i];dList=splitS(dText.x);dStars=0;pChunks=dList.flatMap(chunks);pIdx=0;playing=false;moveTrain("trainD",0,1);
+  $("scoreD").textContent=`${dText.t} · Texto seguido`;
+  $("stageD").innerHTML=`<div class="card"><div class="cat">ESCUCHA Y ESCRIBE TODO EL TEXTO</div>
+   <div class="player">
+     <div class="pcol"><button class="pbtn" id="pRe">⏮</button><span>Desde el<br>principio</span></div>
+     <div class="pcol"><button class="pbtn" id="pPrev">⏪</button><span>Trozo<br>anterior</span></div>
+     <div class="pcol"><button class="pbtn big2" id="pPlay">▶️</button><span id="pLbl">Empezar</span></div>
+     <div class="pcol"><button class="pbtn" id="pRep">🔁</button><span>Repetir<br>trozo</span></div>
+   </div>
+   <div class="pinfo" id="pInfo">Pulsa ▶️ para empezar. Pulsa ⏸ cuando necesites más tiempo.</div>
+   <div class="pdots" id="pDots"></div>
+   <div class="mode" id="pSpeed"><span style="align-self:center;color:var(--muted);font-size:.9rem">Pausa entre trozos:</span>
+    <button data-g="0.6">Corta</button><button data-g="1">Normal</button><button data-g="1.6">Larga</button></div>
+   <textarea class="dict" id="dAll" rows="7" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Escribe aquí todo el dictado…"></textarea>
+   <button class="big" id="pEnd">✅ Terminar y corregir</button></div>`;
+  const sp=()=>$("pSpeed").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.g===pGap));sp();
+  $("pSpeed").querySelectorAll("button").forEach(b=>b.onclick=()=>{pGap=+b.dataset.g;sp()});
+  $("pPlay").onclick=()=>playing?pPause():pGo(pIdx);
+  $("pPrev").onclick=()=>pGo(Math.max(0,pIdx-1));
+  $("pRep").onclick=()=>pGo(Math.min(pIdx,pChunks.length-1));
+  $("pRe").onclick=()=>pGo(0);
+  $("pEnd").onclick=()=>{pStop();const v=$("dAll").value.trim();if(!v){$("pInfo").textContent="Escribe el dictado primero ✏️";return}dEndFull(v)};
+  pDots();
+}
+function pDots(){if(!$("pDots"))return;
+  $("pDots").innerHTML=pChunks.map((c,i)=>`<button class="pd${i<pIdx?" done":""}${i===pIdx?" now":""}" data-i="${i}" title="${esc(c)}">${i+1}</button>`).join("");
+  $("pDots").querySelectorAll(".pd").forEach(b=>b.onclick=()=>pGo(+b.dataset.i));
+  moveTrain("trainD",Math.min(pIdx,pChunks.length),pChunks.length)}
+function pStop(){playing=false;pGen++;clearTimeout(pTimer);clearTimeout(pFall);try{speechSynthesis.cancel()}catch(e){}
+  if($("pPlay")){$("pPlay").textContent="▶️";$("pLbl").textContent="Seguir"}}
+function pPause(){pStop();if($("pInfo"))$("pInfo").innerHTML=`⏸ En pausa en el trozo ${Math.min(pIdx+1,pChunks.length)} de ${pChunks.length}. Pulsa ▶️ para seguir.`}
+function pGo(i){pStop();pIdx=i>=pChunks.length?0:i;playing=true;$("pPlay").textContent="⏸";$("pLbl").textContent="Pausa";
+  const my=pGen;setTimeout(()=>{if(my===pGen)pSpeak(my)},250);$("dAll").focus({preventScroll:true})}
+function pSpeak(my){
+  if(!playing||my!==pGen||!$("pInfo"))return;
+  pDots();
+  if(pIdx>=pChunks.length){pStop();$("pLbl").textContent="Empezar";pIdx=pChunks.length;pDots();$("pInfo").innerHTML="🏁 ¡Fin del dictado! Repasa lo que has escrito y pulsa <b>Terminar y corregir</b>.";moveTrain("trainD",1,1);return}
+  const c=pChunks[pIdx],nw=c.split(" ").length;$("pInfo").innerHTML=`🔊 Trozo ${pIdx+1} de ${pChunks.length}`;
+  let ended=false;
+  const after=()=>{if(ended||my!==pGen||!playing)return;ended=true;clearTimeout(pFall);
+    pTimer=setTimeout(()=>{if(my!==pGen||!playing)return;pIdx++;pSpeak(my)},(1500+nw*1100)*pGap)};
+  try{const u=new SpeechSynthesisUtterance(voz(c,pIdx===pChunks.length-1));u.lang=voice?voice.lang:"es-ES";if(voice)u.voice=voice;u.rate=.7;
+    u.onend=after;u.onerror=()=>{if(my===pGen)after()};speechSynthesis.speak(u);
+    pFall=setTimeout(after,5500+nw*1000)}catch(e){after()}}
+function dEndFull(v){
+  const r=compare(dText.x,v);dStars=1;
+  const html=r.html;
+  // reutiliza la pantalla final
+  dAns=null;showEnd(r.err,r.c,`<p class="corr">${html}</p>`,r.exp);
+}
+function esc(t){return (t||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}
+let dFixShown=false;
+function dNext(){
+  const v=$("dIn").value.trim();
+  if(!v){$("dFix").innerHTML='<div class="fb info">Escribe la frase primero ✏️</div>';return}
+  dAns[dI]=v;
+  if(dMode==="frase"&&!dFixShown){const r=compare(dList[dI],v);dFixShown=true;tone(r.err===0);
+    $("dFix").innerHTML=`<div class="corr">${r.html}</div><div class="fb ${r.err?"bad":"ok"}">${r.err?`${r.err} ${r.err===1?"fallo":"fallos"} · ${r.tipos}`:pick(PRAISE)}</div>${expHTML(r.exp)}`;
+    $("dN").textContent=dI<dList.length-1?"Siguiente frase ➜":"✅ Ver resultado";return}
+  dFixShown=false;dStars++;moveTrain("trainD",dStars,dList.length);
+  if(dI<dList.length-1){dI++;dShow()}else dEnd();
+}
+/* --- comparar palabra a palabra --- */
+const tok=t=>(t.normalize("NFC").match(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9]+|[.,;:!?¡¿]/g)||[]);
+const bare=w=>w.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+function lcs(a,b){const m=a.length,n=b.length,T=Array.from({length:m+1},()=>new Array(n+1).fill(0));
+  for(let i=m-1;i>=0;i--)for(let j=n-1;j>=0;j--)T[i][j]=a[i]===b[j]?T[i+1][j+1]+1:Math.max(T[i+1][j],T[i][j+1]);
+  const pairs=[];let i=0,j=0;while(i<m&&j<n){if(a[i]===b[j]){pairs.push([i,j]);i++;j++}else if(T[i+1][j]>=T[i][j+1])i++;else j++}return pairs}
+const PN={".":"el punto",",":"la coma","!":"el signo de cerrar exclamación","¡":"el signo de abrir exclamación","?":"el signo de cerrar interrogación","¿":"el signo de abrir interrogación",";":"el punto y coma",":":"los dos puntos"};
+const q=w=>`«<b>${esc(w)}</b>»`;
+function lev(a,b){const d=Array.from({length:a.length+1},(_,i)=>[i]);for(let j=1;j<=b.length;j++)d[0][j]=j;
+  for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[a.length][b.length]}
+function letterWhy(o,t){const bo=bare(o),bt=bare(t);
+  const N=[
+   [x=>x.replace(/m([pb])/g,"n$1"),()=>"antes de <b>p</b> y <b>b</b> siempre se escribe <b>m</b>"],
+   [x=>x.replace(/z/g,"c"),()=>/z[aou]/.test(bo)||/c[ei]/.test(bo)?"recuerda: <b>za, zo, zu</b> y <b>ce, ci</b>":"fíjate si va con <b>c</b> o con <b>z</b>"],
+   [x=>x.replace(/v/g,"b"),()=>`se escribe con <b>${(bo.match(/b/g)||[]).length>(bt.match(/b/g)||[]).length?"b":"v"}</b>`],
+   [x=>x.replace(/h/g,""),()=>(bo.match(/h/g)||[]).length>(bt.match(/h/g)||[]).length?"lleva <b>h</b> (aunque no suena)":"no lleva <b>h</b>"],
+   [x=>x.replace(/ll/g,"y"),()=>`se escribe con <b>${bo.includes("ll")?"ll":"y"}</b>`],
+   [x=>x.replace(/rr/g,"r"),()=>`se escribe con <b>${bo.includes("rr")?"rr":"r"}</b>`],
+   [x=>x.replace(/g([ei])/g,"j$1"),()=>"fíjate si va con <b>g</b> o con <b>j</b>"],
+   [x=>x.replace(/qu/g,"k").replace(/c([aou])/g,"k$1"),()=>"fíjate en <b>ca, que, qui, co, cu</b>"]];
+  let co=bo,ct=bt;const why=[];
+  N.forEach(([f,r])=>{const a=f(co),b=f(ct);if((a!==co||b!==ct)&&lev(a,b)<lev(co,ct)){why.push(r());co=a;ct=b}});
+  if(co===ct&&why.length)return why.join("; y además ")+".";
+  if(why.length)return why.join("; ")+"; y revisa las demás letras.";
+  if(bt.length<bo.length)return "te ha faltado alguna letra.";
+  if(bt.length>bo.length)return "te ha sobrado alguna letra.";
+  return "fíjate bien en las letras.";}
+function explainPair(o,t,atStart){const out=[];
+  if(bare(o)===bare(t)){
+    if(o[0]!==t[0]&&o[0].toLowerCase()===t[0].toLowerCase()){
+      if(o[0]===o[0].toUpperCase())out.push(`${q(t)} → ${q(o)}: va con <b>mayúscula</b> ${atStart?"porque empieza la frase (después de punto o al principio).":"porque es un <b>nombre propio</b>."}`);
+      else out.push(`${q(t)} → ${q(o)}: va con <b>minúscula</b>; solo se usa mayúscula al empezar la frase y en los nombres propios.`)}
+    if(o.toLowerCase()!==t.toLowerCase()){const ao=[...o.toLowerCase()].find((c,i)=>c!==t.toLowerCase()[i]&&/[áéíóú]/.test(c));
+      out.push(ao?`${q(t)} → ${q(o)}: lleva <b>tilde</b> en la «${ao}».`:`${q(t)} → ${q(o)}: <b>no lleva tilde</b>.`)}
+    return out}
+  return [`${q(t)} → ${q(o)}: ${letterWhy(o,t)}`]}
+function explain(A,i,oa,tb){const ex=[],isP=w=>/^[.,;:!?¡¿]$/.test(w);
+  const ow=[],tw=tb.filter(x=>!isP(x));
+  oa.forEach((o,k)=>{const idx=i+k;if(isP(o)){if(!tb.includes(o))ex.push(`Falta ${PN[o]||"un signo"} después de ${q(A[idx-1]||"")}.`)}else ow.push({o,start:idx===0||/^[.!?]$/.test(A[idx-1])})});
+  tb.filter(isP).forEach(p=>{if(!oa.includes(p))ex.push(`Sobra ${PN[p]||"un signo"}: aquí no va.`)});
+  if(!ow.length&&tw.length)ex.push(`Sobra ${q(tw.join(" "))}: esa palabra no está en el dictado.`);
+  else if(ow.length&&!tw.length)ex.push(`Te has saltado ${q(ow.map(x=>x.o).join(" "))}. Escucha otra vez ese trozo.`);
+  else if(ow.length===tw.length)ow.forEach((x,k)=>ex.push(...explainPair(x.o,tw[k],x.start)));
+  else if(tw.length<ow.length&&bare(tw.join(""))===bare(ow.map(x=>x.o).join("")))ex.push(`${q(tw.join(" "))}: has <b>juntado palabras</b>. Se escriben separadas: ${q(ow.map(x=>x.o).join(" "))}.`);
+  else if(tw.length<ow.length)ex.push(`${q(tw.join(" "))} → ${q(ow.map(x=>x.o).join(" "))}: te has saltado o juntado alguna palabra. Escribe cada palabra <b>separada</b>.`);
+  else ex.push(`${q(tw.join(" "))} → ${q(ow.map(x=>x.o).join(" "))}: aquí se escribe así. ¿Has separado alguna palabra que va junta?`);
+  return ex}
+function compare(orig,typed){
+  const A=tok(orig),B=tok(typed),P=lcs(A,B);P.push([A.length,B.length]);
+  let i=0,j=0,html=[],err=0,exp=[],c={tilde:0,may:0,punt:0,letra:0};
+  const isP=w=>/^[.,;:!?¡¿]$/.test(w);
+  const join=arr=>arr.join(" ").replace(/ ([.,;:!?])/g,"$1").replace(/([¡¿]) /g,"$1");
+  P.forEach(([pi,pj])=>{
+    const oa=A.slice(i,pi),tb=B.slice(j,pj);
+    if(oa.length||tb.length){
+      err+=Math.max(oa.filter(x=>!isP(x)).length,tb.filter(x=>!isP(x)).length)+Math.max(oa.filter(isP).length,tb.filter(isP).length)*(oa.some(isP)||tb.some(isP)?1:0);
+      oa.forEach((o,k)=>{const t=tb[k];if(isP(o)||(t&&isP(t)))c.punt++;else if(t&&bare(t)===bare(o)){if(t.toLowerCase()===o.toLowerCase())c.may++;else c.tilde++}else c.letra++});
+      if(!oa.length)c.letra+=tb.filter(x=>!isP(x)).length;
+      exp.push(...explain(A,i,oa,tb));
+      html.push(`<span class="err">${tb.length?`<s>${esc(join(tb))}</s>`:""}<ins>${oa.length?esc(join(oa)):"✗"}</ins></span>`);
+    }
+    if(pi<A.length)html.push(`<span class="okw">${esc(A[pi])}</span>`);
+    i=pi+1;j=pj+1});
+  const tipos=[c.letra&&`letras: ${c.letra}`,c.tilde&&`tildes: ${c.tilde}`,c.may&&`mayúsculas: ${c.may}`,c.punt&&`puntos y comas: ${c.punt}`].filter(Boolean).join(" · ");
+  return {err,exp,html:html.join(" ").replace(/ <span class="okw">([.,;:!?])<\/span>/g,'<span class="okw">$1</span>'),tipos,c}}
+function expHTML(ex){const u=[...new Set(ex)];if(!u.length)return "";return `<div class="expl"><div class="cat">📝 POR QUÉ ES UN FALLO</div><ol>${u.map(e=>`<li>${e}</li>`).join("")}</ol></div>`}
+function dEnd(){
+  let total=0,C={tilde:0,may:0,punt:0,letra:0},html="";
+  let ex=[];dList.forEach((s,k)=>{const r=compare(s,dAns[k]||"");total+=r.err;ex.push(...r.exp);Object.keys(C).forEach(x=>C[x]+=r.c[x]);html+=`<p class="corr">${r.html}</p>`});
+  showEnd(total,C,html,ex)}
+function showEnd(total,C,html,ex){
+  const st=total===0?5:total<=2?4:total<=4?3:total<=7?2:1;
+  const msg=total===0?"¡Dictado perfecto! ¡Eres el maquinista campeón!":total<=2?"¡Muy bien! Casi perfecto.":total<=5?"¡Buen trabajo! Repasa las palabras en verde.":"¡A seguir practicando! Vuelve a intentarlo.";
+  const tips=[];if(C.may)tips.push("Mayúscula al <b>empezar</b>, después de <b>punto</b> y en los <b>nombres propios</b>.");if(C.tilde)tips.push("Fíjate en las <b>tildes</b>: año, colegio, celebración, irá…");if(C.punt)tips.push("No olvides los <b>puntos</b> y las <b>comas</b>.");if(C.letra)tips.push("Escucha <b>a trozos</b> y escribe las palabras <b>separadas</b>.");
+  $("scoreD").textContent=`${dText.t} · ${total} ${total===1?"fallo":"fallos"}`;
+  tone(total<=2);
+  $("stageD").innerHTML=`<div class="card"><div class="cat">¡HAS LLEGADO A LA ESTACIÓN!</div><div class="stars">${"★".repeat(st)}${"☆".repeat(5-st)}</div>
+   <div class="word">${total} ${total===1?"fallo":"fallos"}</div><p class="q">${msg}</p>
+   ${tips.length?`<div class="rule" style="text-align:left">${tips.map(t=>"💡 "+t).join("<br>")}</div>`:""}</div>
+   <div class="card" style="text-align:left"><div class="cat">CORRECCIÓN</div>${html}
+   <p style="font-size:.85rem;color:var(--muted);margin:4px 0 0"><s style="color:var(--bad)">rojo</s> = lo que escribiste · <span style="color:var(--ok);font-weight:700">verde</span> = cómo se escribe</p></div>
+   ${ex&&ex.length?`<div class="card" style="text-align:left">${expHTML(ex)}</div>`:""}
+   <div class="row">${dText.x?`<button class="big" onclick="dStart(TEXTOS.indexOf(dText))">🔁 Repetir este dictado</button>`:`<button class="big" onclick="dHard()">🔁 Otra vez</button><button class="big" onclick="dStart(1)">🚂 Ahora el Dictado 2</button>`}<button class="btn" onclick="if(dSaved){dMode=dSaved;dSaved=null}dIntro()" style="background:var(--pur)">📚 Elegir otro</button></div>`;
+}
+/* ================= PREGUNTAS ================= */
+const MN=[["co_prar","m"],["a_bulancia","m"],["sie_pre","m"],["te_peratura","m"],["so_brilla","m"],["ca_bio","m"],["a_plio","m"],["ha_bre","m"],
+ ["ca_pana","m"],["bo_billa","m"],["e_pezar","m"],["so_brero","m"],["ca_pamento","m"],["alfo_bra","m"],["co_ba","m"],["ca_po","m"],
+ ["ca_ción","n"],["co_cierto","n"],["fue_te","n"],["cue_to","n"],["mu_do","n"],["ca_tar","n"],["co_curso","n"],["mo_taña","n"]];
+const CZ=[["ca_uela","z"],["_apato","z"],["cere_a","z"],["_uecos","z"],["bi_cocho","z"],["_umo","z"],["tro_o","z"],["eri_o","z"],["calaba_a","z"],["la_os","z"],["a_ules","z"],["_anahoria","z"],
+ ["_ebolla","c"],["_ilindro","c"],["deli_ioso","c"],["cal_etín","c"],["ne_esario","c"],["a_ercar","c"],["electri_idad","c"],["a_eitunas","c"],["_iervo","c"],["con_ierto","c"]];
+const COMUNES=["niño","libro","perro","ciudad","mesa","silla","ordenador","castillo","teléfono","osito","fotografía","cazador","alpinista","inventor","ratón","superheroína","carretera","estuche","oficina","coche"];
+const PROPIOS=["Marta","París","Tarragona","Mataró","Carlos","Montserrat","Valldemia","Madrid","Tobi","Claudia","Eduardo","Pedro","Mérida","Batman","Girona","Rusia","Juan","Harry Potter"];
+const PLURAL=[["coche","coches"],["abuelo","abuelos"],["color","colores"],["zumo","zumos"],["manzana","manzanas"],["bocadillo","bocadillos"],["pavo","pavos"],["hermana","hermanas"],
+ ["armario","armarios"],["habitación","habitaciones"],["árbol","árboles"],["lápiz","lápices"],["pez","peces"],["ratón","ratones"],["flor","flores"],["cine","cines"],["camión","camiones"],["nariz","narices"]];
+const CONC=[["Los niños ___ en el parque.","juegan",["juega","jugamos"]],["El café ___ muy caliente.","está",["están","estamos"]],["Mi primo y yo ___ al mismo colegio.","vamos",["va","van"]],
+ ["El perro de Javi ___ ladrando toda la noche.","estuvo",["estuvieron","estuvimos"]],["Tus hermanos y tú ___ la misma camiseta.","lleváis",["lleva","llevamos"]],
+ ["Esa flor ___ muy bien.","huele",["huelen","olemos"]],["Mi hermana ___ ido al cine.","ha",["han","hemos"]],["Los coches ___ estropeados.","están",["está","estoy"]],["Los árboles ___ enormes.","son",["es","soy"]]];
+const RANA=[["¿Qué se forma cerca del río después de las lluvias?","Unas charcas",["Un lago grande","Una montaña"]],["¿Qué hace la pequeña rana todo el día?","Saltar de piedra en piedra",["Dormir","Nadar en el mar"]],
+ ["¿Qué decidieron hacer las ranas?","Un concurso",["Una fiesta de cumpleaños","Un viaje"]],["¿En qué consistía el concurso?","En dar el salto más largo",["En cantar más fuerte","En nadar más rápido"]],
+ ["¿Quién parecía que iba a ganar la competición?","Una rana muy robusta",["La ranita más pequeña","Un sapo verde"]],["¿Qué hicieron las otras ranas cuando se presentó la ranita?","Se rieron",["Se fueron","Se pusieron a llorar"]],
+ ["¿Qué significa que la ranita «no se acobardó»?","Que no tuvo miedo",["Que se cansó","Que se escondió"]],["¿Quién ganó el torneo?","La ranita más pequeña",["La rana más robusta","Nadie"]]];
+function pluralWrong(s,p){const c=[s+"s",s+"es",s.replace(/z$/,"c")+"s",s+"ses",s.replace(/ón$/,"on")+"s"];return shuffle([...new Set(c)].filter(x=>x!==p)).slice(0,2)}
+function gap(w){return w.replace("_",'<span class="gap">?</span>')}
+const NP=12;let pqs=[],pn=0,pStars=0;
+function pBuild(){
+  const out=[];
+  shuffle(MN).slice(0,2).forEach(([w,a])=>out.push({cat:"¿M O N?",q:"¿Qué letra falta?",word:gap(w),a,opts:["m","n"],two:1,full:w.replace("_",a),rule:"Antes de <b>p</b> y <b>b</b> siempre se escribe <b>m</b>."}));
+  shuffle(CZ).slice(0,3).forEach(([w,a])=>out.push({cat:"¿C O Z?",q:"¿Qué letra falta?",word:gap(w),a,opts:["c","z"],two:1,full:w.replace("_",a),rule:"<b>za zo zu</b> · <b>ce ci</b>"}));
+  const nn=shuffle([...COMUNES.map(w=>[w,"común"]),...PROPIOS.map(w=>[w,"propio"])]).slice(0,2);
+  nn.forEach(([w,a])=>out.push({cat:"NOMBRES",q:"¿Es un nombre común o propio?",word:w,a,opts:["común","propio"],two:1,rule:"Los <b>propios</b> nombran algo concreto y van con <b>mayúscula</b>."}));
+  shuffle(PLURAL).slice(0,2).forEach(([s,p])=>out.push({cat:"SINGULAR Y PLURAL",q:`¿Cuál es el plural de…`,word:s,a:p,opts:shuffle([p,...pluralWrong(s,p)])}));
+  shuffle(CONC).slice(0,1).forEach(([f,a,w])=>out.push({cat:"FORMA LA FRASE",q:"¿Qué palabra completa la frase?",word:`<span style="font-size:.7em">${f.replace("___",'<span class="gap">?</span>')}</span>`,a,opts:shuffle([a,...w])}));
+  shuffle(RANA).slice(0,2).forEach(([q,a,w])=>out.push({cat:"LA RANA SALTARINA",q,a,opts:shuffle([a,...w])}));
+  return shuffle(out);
+}
+function pStart(){pqs=pBuild();pn=0;pStars=0;moveTrain("trainP",0,NP);pShow()}
+function pShow(){
+  $("scoreP").textContent=`Pregunta ${pn+1} de ${NP} · ★ ${pStars}`;
+  const q=pqs[pn];
+  $("stageP").innerHTML=`<div style="display:flex;flex-direction:column;gap:12px"><div class="card"><div class="cat">${q.cat}</div><p class="q">${q.q}</p>${q.word?`<div class="word">${q.word}</div>`:""}
+   <div class="fb" id="pFb"></div><div id="pRule"></div></div><div class="answers${q.two?" two":""}">${q.opts.map(o=>`<button class="ans" data-v="${o}">${o}</button>`).join("")}</div></div>`;
+  $("stageP").querySelectorAll(".ans").forEach(b=>b.onclick=()=>pAnswer(b));
+}
+function pAnswer(b){
+  const q=pqs[pn],ok=b.dataset.v===q.a,fb=$("pFb");
+  document.querySelectorAll("#stageP .ans").forEach(x=>{x.disabled=true;if(x.dataset.v===q.a)x.classList.add("right")});
+  if(ok){pStars++;fb.className="fb ok";fb.textContent=pick(PRAISE)+(q.full?"  →  "+q.full:"");moveTrain("trainP",pStars,NP)}
+  else{b.classList.add("wrong");fb.className="fb bad";fb.textContent=q.full?`Se escribe: ${q.full}`:`Era: ${q.a}`;if(q.rule)$("pRule").innerHTML=`<div class="rule">${q.rule}</div>`}
+  tone(ok);$("scoreP").textContent=`Pregunta ${pn+1} de ${NP} · ★ ${pStars}`;
+  setTimeout(()=>{pn++;if(pn<NP)pShow();else{$("scoreP").textContent=`Final · ★ ${pStars} de ${NP}`;$("stageP").innerHTML=endCard(pStars,NP,"pStart()")}},ok?1300:2600);
+}
+
+/* ================= ORDENA ================= */
+const ANA=[["raqueta","🎾"],["camión","🚚"],["tijeras","✂️"],["regalo","🎁"],["vestido","👗"],["pelota","⚽"],["mochila","🎒"],["sombrero","🎩"],["paraguas","☂️"],["zanahoria","🥕"],["calcetín","🧦"],["cebolla","🧅"],["erizo","🦔"],["calabaza","🎃"]];
+const NO=10;let oList=[],oI=0,oStars=0,oIn=[],oTiles=[],oErr=false;
+function wagons(){$("wbar").innerHTML='<span class="loco">🚂</span>'+oList.map((x,i)=>`<span class="w${i<oI||(i===oI&&false)?" full":""}" id="w${i}">${i<oI?x[1]:""}</span>`).join("")}
+function oStart(){oList=shuffle(ANA).slice(0,NO);oI=0;oStars=0;wagons();oShow()}
+function oShow(){
+  const [w,e]=oList[oI];oIn=[];oErr=false;
+  let letters=w.split("");do{oTiles=shuffle(letters)}while(oTiles.join("")===w);
+  $("scoreO").textContent=`Palabra ${oI+1} de ${NO} · ★ ${oStars}`;
+  $("stageO").innerHTML=`<div class="card"><div class="cat">ORDENA LAS LETRAS</div><div style="font-size:3.4rem;line-height:1">${e}</div>
+   <div class="tiles" id="oTi"></div>
+   <input class="dict" id="oIn" maxlength="${w.length+2}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" placeholder="Escribe la palabra…">
+   <div class="slots" id="oSl"></div><div class="fb" id="oFb"></div>
+   <div class="row"><button class="btn" id="oHelp" style="background:var(--pur)">💡 Pista</button><button class="btn" id="oChk" style="background:var(--ok)">✅ Comprobar</button></div>
+   <p style="margin:0;font-size:.85rem;color:var(--muted)">Escribe con el teclado o toca las letras.</p></div>`;
+  const inp=$("oIn");
+  inp.oninput=()=>{oDraw();if(inp.value.trim().length>=w.length)oCheck()};
+  inp.onkeydown=ev=>{if(ev.key==="Enter"){ev.preventDefault();oCheck(true)}};
+  $("oChk").onclick=()=>oCheck(true);
+  $("oHelp").onclick=()=>{oErr=true;const cur=inp.value.toLowerCase();let k=0;while(k<cur.length&&cur[k]===w[k])k++;inp.value=w.slice(0,k+1);oDraw();inp.focus();if(k+1>=w.length)oCheck()};
+  oDraw();setTimeout(()=>inp.focus(),200);
+}
+function oDraw(){
+  const w=oList[oI][0],v=($("oIn").value||"").toLowerCase();
+  // marcar fichas usadas
+  const used=new Array(oTiles.length).fill(false);
+  for(const ch of v){const k=oTiles.findIndex((c,i)=>!used[i]&&c===ch);if(k>=0)used[k]=true}
+  $("oTi").innerHTML=oTiles.map((c,i)=>`<button class="tile" data-i="${i}" ${used[i]?"disabled":""}>${c}</button>`).join("");
+  $("oTi").querySelectorAll(".tile").forEach(b=>b.onclick=()=>{$("oIn").value+=oTiles[+b.dataset.i];oDraw();if($("oIn").value.length>=w.length)oCheck()});
+  $("oSl").innerHTML=w.split("").map((c,i)=>`<div class="slot">${v[i]||""}</div>`).join("");
+}
+function oCheck(force){
+  const w=oList[oI][0],inp=$("oIn"),typed=inp.value.trim().toLowerCase();
+  if(!typed){$("oFb").className="fb info";$("oFb").textContent="Escribe la palabra ✏️";return}
+  if(typed.length<w.length&&!force)return;
+  if(typed===w){if(!oErr)oStars++;tone(true);inp.disabled=true;$("oSl").classList.add("ok");$("oFb").className="fb ok";$("oFb").textContent=pick(PRAISE);say(w);
+    setTimeout(()=>{oI++;wagons();if(oI<NO)oShow();else{$("scoreO").textContent=`Final · ★ ${oStars} de ${NO}`;$("stageO").innerHTML=endCard(oStars,NO,"oStart()")}},1300);return}
+  oErr=true;tone(false);$("oSl").classList.remove("bad");void $("oSl").offsetWidth;$("oSl").classList.add("bad");$("oFb").className="fb bad";
+  const sameNoAcc=noAcc(typed)===noAcc(w);
+  $("oFb").textContent=sameNoAcc?"¡Casi! Revisa la tilde ( ´ )":"¡Uy! Prueba otra vez 💪";
+  if(!sameNoAcc)setTimeout(()=>{inp.value="";oDraw();inp.focus()},700);else inp.focus();
+}
+/* ================= TABS ================= */
+function tab(w){["dic","pre","ord"].forEach(id=>{$(id).hidden=id!==w;if(id===w)$(id).style.display="flex"});
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-pressed",t.dataset.t===w));
+  pStop();
+  if(w==="pre")moveTrain("trainP",pStars,NP);if(w==="dic")moveTrain("trainD",dStars,Math.max(1,dList.length))}
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>tab(t.dataset.t));
+window.addEventListener("resize",()=>{moveTrain("trainP",pStars,NP);moveTrain("trainD",dStars,Math.max(1,dList.length))});
+dIntro();pStart();oStart();
+</script>
+</body></html>
